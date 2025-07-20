@@ -1,18 +1,19 @@
 use anyhow::Result;
-use axum::{Router, response::Html, routing::get};
+use dotenvy::dotenv;
+use envconfig::Envconfig;
+use sevria_api::{config::Config, http};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let app = Router::new().route("/", get(handler));
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:4000").await?;
+    dotenv().ok();
 
-    println!("listening on {}", listener.local_addr()?);
+    let config = Config::init_from_env()?;
+    let router = http::new_router();
+    let listener = tokio::net::TcpListener::bind(&config.http_address).await?;
 
-    axum::serve(listener, app).await?;
+    println!("running http server on {}", listener.local_addr()?);
+
+    axum::serve(listener, router).await?;
 
     Ok(())
-}
-
-async fn handler() -> Html<&'static str> {
-    Html("<h1>Hello from Sevria API!</h1>")
 }
