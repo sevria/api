@@ -1,10 +1,12 @@
-use axum::{Json, Router, routing::get};
+use std::sync::Arc;
+
+use axum::{Router, routing::get};
 use serde::Serialize;
 use utoipa::OpenApi;
 use utoipa_axum::router::OpenApiRouter;
 use utoipa_scalar::{Scalar, Servable};
 
-use crate::{constant, domain::schema};
+use crate::{constant, context::Context, domain::schema, util::http::Json};
 
 #[derive(OpenApi)]
 #[openapi(
@@ -14,10 +16,10 @@ use crate::{constant, domain::schema};
 )]
 struct ApiDoc;
 
-pub fn new_router() -> Router {
+pub fn new_router(ctx: Arc<Context>) -> Router {
     let (router, api) = OpenApiRouter::with_openapi(ApiDoc::openapi())
         .route("/", get(health_check))
-        .nest("/schemas", schema::http::router())
+        .nest("/schemas", schema::http::router(ctx.clone()))
         .split_for_parts();
 
     let router = router.merge(Scalar::with_url("/docs", api));
