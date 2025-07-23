@@ -6,11 +6,12 @@ mod common;
 
 #[tokio::test]
 async fn create_schema_success() -> Result<()> {
-    let state = common::setup().await?;
+    let server = common::setup().await?;
     let req: CreateSchemaRequest = Faker.fake();
-    let res = state.server.post("/schemas").json(&req).await;
+    let res = server.post("/schemas").json(&req).await;
 
     res.assert_status_ok();
+    res.assert_json_contains(&req);
 
     Ok(())
 }

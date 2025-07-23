@@ -4,24 +4,16 @@ use anyhow::Result;
 use axum_test::TestServer;
 use dotenvy::dotenv;
 use envconfig::Envconfig;
-use sevria_api::{config::Config, context::Context, http};
+use sevria_api::{config::Config, http};
 use sqlx::postgres::PgPoolOptions;
 
-#[allow(dead_code)]
-pub struct TestState {
-    pub ctx: Arc<Context>,
-    pub server: TestServer,
-}
-
-pub async fn setup() -> Result<TestState> {
+pub async fn setup() -> Result<TestServer> {
     dotenv().ok();
 
     let config = Config::init_from_env()?;
-    let db = PgPoolOptions::new().connect(&config.database_url).await?;
-
-    let ctx = Arc::new(Context { db });
-    let router = http::new_router(ctx.clone());
+    let db = Arc::new(PgPoolOptions::new().connect(&config.database_url).await?);
+    let router = http::new_router(db);
     let server = TestServer::new(router)?;
 
-    Ok(TestState { ctx, server })
+    Ok(server)
 }

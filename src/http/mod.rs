@@ -2,11 +2,19 @@ use std::sync::Arc;
 
 use axum::{Router, routing::get};
 use serde::Serialize;
+use sqlx::{Pool, Postgres};
 use utoipa::OpenApi;
 use utoipa_axum::router::OpenApiRouter;
 use utoipa_scalar::{Scalar, Servable};
 
-use crate::{constant, context::Context, domain::schema, util::http::Json};
+use crate::{
+    constant,
+    domain::schema::{
+        self, http::SchemaRouterState, repository_impl::SchemaRepositoryImpl,
+        service::SchemaService,
+    },
+    util::http::Json,
+};
 
 #[derive(OpenApi)]
 #[openapi(
@@ -16,10 +24,14 @@ use crate::{constant, context::Context, domain::schema, util::http::Json};
 )]
 struct ApiDoc;
 
-pub fn new_router(ctx: Arc<Context>) -> Router {
+pub fn new_router(db: Arc<Pool<Postgres>>) -> Router {
+    let schema_repository = Arc::new(SchemaRepositoryImpl::new(db.clone()));
+    let schema_service = Arc::new(SchemaService::new(schema_repository));
+    let schema_router_state = Arc::new(SchemaRouterState::new(schema_service));
+
     let (router, api) = OpenApiRouter::with_openapi(ApiDoc::openapi())
         .route("/", get(health_check))
-        .nest("/schemas", schema::http::router(ctx.clone()))
+        .nest("/schemas", schema::http::router(schema_router_state))
         .split_for_parts();
 
     let router = router.merge(Scalar::with_url("/docs", api));
