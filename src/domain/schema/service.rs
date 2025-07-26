@@ -19,16 +19,16 @@ impl SchemaService {
 }
 
 impl SchemaService {
-    pub async fn create_schema(&self, req: &CreateSchemaRequest) -> Result<Schema, Error> {
-        let schema = Schema::new(req.name.clone(), req.fields.clone());
-        self.schema_repository.create_schema(&schema).await
+    pub async fn create(&self, req: &CreateSchemaRequest) -> Result<Schema, Error> {
+        let data = Schema::new(req.name.clone());
+        self.schema_repository.create(&data).await
     }
 
-    pub async fn get_schemas(&self) -> Result<Paginated<Schema>, Error> {
-        self.schema_repository.get_schemas().await
+    pub async fn list(&self) -> Result<Paginated<Schema>, Error> {
+        self.schema_repository.list().await
     }
 
-    pub async fn get_schema(&self, id: &str) -> Result<Schema, Error> {
-        self.schema_repository.get_schema(id).await
+    pub async fn get(&self, id: i64) -> Result<Schema, Error> {
+        self.schema_repository.get(id).await
     }
 }

@@ -9,9 +9,13 @@ use utoipa_scalar::{Scalar, Servable};
 
 use crate::{
     constant,
-    domain::schema::{
-        self, http::SchemaRouterState, repository_impl::SchemaRepositoryImpl,
-        service::SchemaService,
+    domain::{
+        field::{
+            self, http::FieldState, repository_impl::FieldRepositoryImpl, service::FieldService,
+        },
+        schema::{
+            self, http::SchemaState, repository_impl::SchemaRepositoryImpl, service::SchemaService,
+        },
     },
     util::http::Json,
 };
@@ -26,12 +30,21 @@ struct ApiDoc;
 
 pub fn new_router(db: Arc<Pool<Postgres>>) -> Router {
     let schema_repository = Arc::new(SchemaRepositoryImpl::new(db.clone()));
+    let field_repository = Arc::new(FieldRepositoryImpl::new(db.clone()));
+
     let schema_service = Arc::new(SchemaService::new(schema_repository));
-    let schema_router_state = Arc::new(SchemaRouterState::new(schema_service));
+    let field_service = Arc::new(FieldService::new(field_repository));
+
+    let schema_state = Arc::new(SchemaState::new(schema_service));
+    let field_state = Arc::new(FieldState::new(field_service));
 
     let (router, api) = OpenApiRouter::with_openapi(ApiDoc::openapi())
         .route("/", get(health_check))
-        .nest("/schemas", schema::http::router(schema_router_state))
+        .nest("/schemas", schema::http::router(schema_state))
+        .nest(
+            "/schemas/{schema_id}/fields",
+            field::http::router(field_state),
+        )
         .split_for_parts();
 
     let router = router.merge(Scalar::with_url("/docs", api));

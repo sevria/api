@@ -1,10 +1,13 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use sqlx::{Pool, Postgres};
+use sqlx::{Pool, Postgres, QueryBuilder};
 
 use crate::{
-    domain::schema::{model::Schema, repository::SchemaRepository},
+    domain::schema::{
+        model::{Schema, UpdateSchemaRequest},
+        repository::SchemaRepository,
+    },
     util::{
         error::{self, Error},
         paginator::Paginated,
@@ -23,50 +26,22 @@ impl SchemaRepositoryImpl {
 
 #[async_trait]
 impl SchemaRepository for SchemaRepositoryImpl {
-    async fn create_schema(&self, schema: &Schema) -> Result<Schema, Error> {
-        let mut tx = self.db.begin().await.unwrap();
+    async fn create(&self, data: &Schema) -> Result<Schema, Error> {
+        let mut query = QueryBuilder::new("INSERT INTO schemas (name) VALUES (");
 
-        let create_schema_query = sqlx::query!(
-            "INSERT INTO schemas (id, name) VALUES ($1, $2)",
-            schema.id,
-            schema.name
-        );
+        query.push_bind(&data.name);
+        query.push(") RETURNING *");
 
-        if let Err(err) = create_schema_query.execute(&mut *tx).await {
-            log::error!("failed to insert schema: {}", err);
-            return Err(error::internal());
-        }
-
-        for field in schema.fields.clone() {
-            let create_field_query = sqlx::query!(
-                "INSERT INTO schema_fields (id, schema_id, name, value_type, required, default_value)
-                VALUES ($1, $2, $3, $4, $5, $6)",
-                field.id,
-                field.schema_id,
-                field.name,
-                field.value_type,
-                field.required,
-                field.default_value
-            );
-
-            if let Err(err) = create_field_query.execute(&mut *tx).await {
-                log::error!("failed to insert schema field: {}", err);
-                return Err(error::internal());
-            }
-        }
-
-        let _: Result<(), Error> = match tx.commit().await {
-            Ok(_) => Ok(()),
+        match query.build_query_as::<Schema>().fetch_one(&*self.db).await {
+            Ok(schema) => Ok(schema),
             Err(err) => {
-                log::error!("failed to commit transaction: {}", err);
-                return Err(error::internal());
+                log::error!("failed to create schema: {}", err);
+                Err(error::internal_with_message(format!("{}", err).as_str()))
             }
-        };
-
-        Ok(schema.clone())
+        }
     }
 
-    async fn get_schemas(&self) -> Result<Paginated<Schema>, Error> {
+    async fn list(&self) -> Result<Paginated<Schema>, Error> {
         let query = sqlx::query_as::<_, Schema>("SELECT * FROM schemas ORDER BY name ASC");
 
         let schemas = match query.fetch_all(&*self.db).await {
@@ -85,17 +60,52 @@ impl SchemaRepository for SchemaRepositoryImpl {
         })
     }
 
-    async fn get_schema(&self, id: &str) -> Result<Schema, Error> {
+    async fn get(&self, id: i64) -> Result<Schema, Error> {
         let query = sqlx::query_as::<_, Schema>("SELECT * FROM schemas WHERE id = $1").bind(id);
 
-        let schema = match query.fetch_one(&*self.db).await {
-            Ok(schema) => schema,
+        match query.fetch_one(&*self.db).await {
+            Ok(schema) => Ok(schema),
             Err(err) => {
                 log::error!("failed to get schema: {}", err);
                 return Err(error::internal());
             }
-        };
+        }
+    }
 
-        Ok(schema)
+    async fn update(&self, data: &UpdateSchemaRequest) -> Result<Schema, Error> {
+        let mut query = QueryBuilder::new("UPDATE schemas SET");
+        query.push(" id = ");
+        query.push_bind(&data.id);
+
+        if let Some(name) = &data.name {
+            query.push(", name = ");
+            query.push_bind(name);
+        }
+
+        query.push(" WHERE id = ");
+        query.push_bind(&data.id);
+        query.push(" RETURNING *");
+
+        match query.build_query_as::<Schema>().fetch_one(&*self.db).await {
+            Ok(schema) => Ok(schema),
+            Err(err) => {
+                log::error!("failed to update schema: {}", err);
+                return Err(error::internal());
+            }
+        }
+    }
+
+    async fn delete(&self, id: i64) -> Result<Schema, Error> {
+        let mut query = QueryBuilder::new("DELETE FROM schemas WHERE id = ");
+        query.push_bind(&id);
+        query.push(" RETURNING *");
+
+        match query.build_query_as::<Schema>().fetch_one(&*self.db).await {
+            Ok(schema) => Ok(schema),
+            Err(err) => {
+                log::error!("failed to delete schema: {}", err);
+                return Err(error::internal());
+            }
+        }
     }
 }

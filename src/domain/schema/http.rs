@@ -12,20 +12,20 @@ use crate::{
     util::{error::Error, http::Json, paginator::Paginated},
 };
 
-pub struct SchemaRouterState {
+pub struct SchemaState {
     pub schema_service: Arc<SchemaService>,
 }
 
-impl SchemaRouterState {
-    pub fn new(schema_service: Arc<SchemaService>) -> SchemaRouterState {
-        SchemaRouterState { schema_service }
+impl SchemaState {
+    pub fn new(schema_service: Arc<SchemaService>) -> SchemaState {
+        SchemaState { schema_service }
     }
 }
 
-pub fn router(state: Arc<SchemaRouterState>) -> OpenApiRouter {
+pub fn router(state: Arc<SchemaState>) -> OpenApiRouter {
     OpenApiRouter::new()
-        .routes(routes!(create_schema, get_schemas))
-        .routes(routes!(get_schema, update_schema, delete_schema))
+        .routes(routes!(create, list))
+        .routes(routes!(get, update, delete))
         .with_state(state)
 }
 
@@ -40,27 +40,25 @@ pub fn router(state: Arc<SchemaRouterState>) -> OpenApiRouter {
         (status = 200, body = Schema)
     )
 )]
-async fn create_schema(
-    State(state): State<Arc<SchemaRouterState>>,
+async fn create(
+    State(state): State<Arc<SchemaState>>,
     Json(req): Json<CreateSchemaRequest>,
 ) -> Result<Json<Schema>, Error> {
-    let schema = state.schema_service.create_schema(&req).await?;
+    let schema = state.schema_service.create(&req).await?;
     Ok(Json(schema))
 }
 
 #[utoipa::path(
     get,
     path = "",
-    summary = "Get schemas",
+    summary = "List schemas",
     tag = constant::TAG_SCHEMA,
     responses(
         (status = 200, body = Paginated<Schema>)
     )
 )]
-async fn get_schemas(
-    State(state): State<Arc<SchemaRouterState>>,
-) -> Result<Json<Paginated<Schema>>, Error> {
-    Ok(Json(state.schema_service.get_schemas().await?))
+async fn list(State(state): State<Arc<SchemaState>>) -> Result<Json<Paginated<Schema>>, Error> {
+    Ok(Json(state.schema_service.list().await?))
 }
 
 #[utoipa::path(
@@ -75,11 +73,11 @@ async fn get_schemas(
         (status = 200, body = Schema)
     )
 )]
-async fn get_schema(
-    State(state): State<Arc<SchemaRouterState>>,
-    Path(id): Path<String>,
+async fn get(
+    State(state): State<Arc<SchemaState>>,
+    Path(id): Path<i64>,
 ) -> Result<Json<Schema>, Error> {
-    Ok(Json(state.schema_service.get_schema(&id).await?))
+    Ok(Json(state.schema_service.get(id).await?))
 }
 
 #[utoipa::path(
@@ -88,21 +86,18 @@ async fn get_schema(
     summary = "Update schema",
     tag = constant::TAG_SCHEMA,
     params(
-        ("id" = String, Path)
+        ("id" = i64, Path)
     ),
     request_body = UpdateSchemaRequest,
     responses(
         (status = 200, body = Schema)
     )
 )]
-async fn update_schema(
-    Path(id): Path<String>,
-    Json(req): Json<UpdateSchemaRequest>,
-) -> Json<Schema> {
+async fn update(Path(id): Path<i64>, Json(req): Json<UpdateSchemaRequest>) -> Json<Schema> {
     Json(Schema {
         id,
         name: req.name.unwrap_or_default(),
-        fields: req.fields.unwrap_or_default(),
+        fields: vec![],
     })
 }
 
@@ -112,15 +107,15 @@ async fn update_schema(
     summary = "Delete schema",
     tag = constant::TAG_SCHEMA,
     params(
-        ("id" = String, Path)
+        ("id" = i64, Path)
     ),
     responses(
         (status = 200, body = Schema)
     )
 )]
-async fn delete_schema(Path(id): Path<String>) -> Json<Schema> {
+async fn delete(Path(id): Path<i64>) -> Json<Schema> {
     Json(Schema {
-        id: id.clone(),
+        id,
         name: format!("Name of {}", id),
         fields: vec![],
     })
