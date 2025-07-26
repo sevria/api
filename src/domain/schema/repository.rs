@@ -9,4 +9,5 @@ use crate::{
 pub trait SchemaRepository: Send + Sync {
     async fn create_schema(&self, schema: &Schema) -> Result<Schema, Error>;
     async fn get_schemas(&self) -> Result<Paginated<Schema>, Error>;
+    async fn get_schema(&self, id: &str) -> Result<Schema, Error>;
 }

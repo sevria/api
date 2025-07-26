@@ -84,4 +84,18 @@ impl SchemaRepository for SchemaRepositoryImpl {
             total: 1,
         })
     }
+
+    async fn get_schema(&self, id: &str) -> Result<Schema, Error> {
+        let query = sqlx::query_as::<_, Schema>("SELECT * FROM schemas WHERE id = $1").bind(id);
+
+        let schema = match query.fetch_one(&*self.db).await {
+            Ok(schema) => schema,
+            Err(err) => {
+                log::error!("failed to get schema: {}", err);
+                return Err(error::internal());
+            }
+        };
+
+        Ok(schema)
+    }
 }

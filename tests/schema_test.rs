@@ -30,3 +30,16 @@ async fn get_schemas_success() -> Result<()> {
 
     Ok(())
 }
+
+#[tokio::test]
+async fn get_schema_success() -> Result<()> {
+    let server = common::setup().await?;
+    let res = server.get("/schemas/Zj9jXWCe5MVaYcJ8Vb-2n").await;
+
+    res.assert_status_ok();
+    res.assert_json_contains(&json!({
+        "name": "posts",
+    }));
+
+    Ok(())
+}

@@ -75,12 +75,11 @@ async fn get_schemas(
         (status = 200, body = Schema)
     )
 )]
-async fn get_schema(Path(id): Path<String>) -> Json<Schema> {
-    Json(Schema {
-        id: id.clone(),
-        name: format!("Name of {}", id),
-        fields: vec![],
-    })
+async fn get_schema(
+    State(state): State<Arc<SchemaRouterState>>,
+    Path(id): Path<String>,
+) -> Result<Json<Schema>, Error> {
+    Ok(Json(state.schema_service.get_schema(&id).await?))
 }
 
 #[utoipa::path(

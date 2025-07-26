@@ -27,4 +27,8 @@ impl SchemaService {
     pub async fn get_schemas(&self) -> Result<Paginated<Schema>, Error> {
         self.schema_repository.get_schemas().await
     }
+
+    pub async fn get_schema(&self, id: &str) -> Result<Schema, Error> {
+        self.schema_repository.get_schema(id).await
+    }
 }
