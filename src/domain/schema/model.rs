@@ -1,12 +1,14 @@
 use fake::Dummy;
 use nanoid::nanoid;
 use serde::{Deserialize, Serialize};
+use sqlx::prelude::FromRow;
 use utoipa::ToSchema;
 
-#[derive(Clone, Serialize, ToSchema)]
+#[derive(Clone, FromRow, Serialize, ToSchema)]
 pub struct Schema {
     pub id: String,
     pub name: String,
+    #[sqlx(skip)]
     pub fields: Vec<SchemaField>,
 }
 
@@ -28,7 +30,7 @@ impl Schema {
     }
 }
 
-#[derive(Clone, Debug, Deserialize, Dummy, Serialize, ToSchema)]
+#[derive(Clone, Debug, Deserialize, Dummy, FromRow, Serialize, ToSchema)]
 pub struct SchemaField {
     #[serde(skip)]
     pub id: String,

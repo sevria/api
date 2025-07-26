@@ -9,7 +9,7 @@ use crate::{
         model::{CreateSchemaRequest, Schema, UpdateSchemaRequest},
         service::SchemaService,
     },
-    util::{error::Error, http::Json},
+    util::{error::Error, http::Json, paginator::Paginated},
 };
 
 pub struct SchemaRouterState {
@@ -54,11 +54,13 @@ async fn create_schema(
     summary = "Get schemas",
     tag = constant::TAG_SCHEMA,
     responses(
-        (status = 200, body = Vec<Schema>)
+        (status = 200, body = Paginated<Schema>)
     )
 )]
-async fn get_schemas() -> Json<Vec<Schema>> {
-    Json(vec![])
+async fn get_schemas(
+    State(state): State<Arc<SchemaRouterState>>,
+) -> Result<Json<Paginated<Schema>>, Error> {
+    Ok(Json(state.schema_service.get_schemas().await?))
 }
 
 #[utoipa::path(
