@@ -4,6 +4,6 @@ CREATE TABLE fields (
     value_type VARCHAR(50) NOT NULL,
     required BOOLEAN NOT NULL,
     default_value VARCHAR(100),
-    UNIQUE(schema_id, name),
+    PRIMARY KEY(schema_id, name),
     FOREIGN KEY (schema_id) REFERENCES schemas(id) ON DELETE CASCADE
 );

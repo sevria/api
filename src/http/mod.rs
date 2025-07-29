@@ -10,12 +10,14 @@ use utoipa_scalar::{Scalar, Servable};
 use crate::{
     constant,
     domain::{
+        auth::{self, http::AuthState, service::AuthService},
         field::{
             self, http::FieldState, repository_impl::FieldRepositoryImpl, service::FieldService,
         },
         schema::{
             self, http::SchemaState, repository_impl::SchemaRepositoryImpl, service::SchemaService,
         },
+        user::repository_impl::UserRepositoryImpl,
     },
     util::http::Json,
 };
@@ -31,15 +33,19 @@ struct ApiDoc;
 pub fn new_router(db: Arc<Pool<Postgres>>) -> Router {
     let schema_repository = Arc::new(SchemaRepositoryImpl::new(db.clone()));
     let field_repository = Arc::new(FieldRepositoryImpl::new(db.clone()));
+    let user_repository = Arc::new(UserRepositoryImpl::new(db.clone()));
 
     let schema_service = Arc::new(SchemaService::new(schema_repository));
     let field_service = Arc::new(FieldService::new(field_repository));
+    let auth_service = Arc::new(AuthService::new(user_repository));
 
     let schema_state = Arc::new(SchemaState::new(schema_service));
     let field_state = Arc::new(FieldState::new(field_service));
+    let auth_state = Arc::new(AuthState::new(auth_service));
 
     let (router, api) = OpenApiRouter::with_openapi(ApiDoc::openapi())
         .route("/", get(health_check))
+        .nest("/auth", auth::http::router(auth_state))
         .nest("/schemas", schema::http::router(schema_state))
         .nest(
             "/schemas/{schema_id}/fields",
