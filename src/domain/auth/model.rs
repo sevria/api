@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
@@ -11,5 +12,13 @@ pub struct LoginRequest {
 
 #[derive(Serialize, ToSchema)]
 pub struct LoginResponse {
+    pub access: Token,
     pub user: User,
+}
+
+#[derive(Deserialize, Serialize, ToSchema)]
+pub struct Token {
+    pub token: String,
+    #[schema(format = "date-time")]
+    pub expires_at: DateTime<Utc>,
 }

@@ -8,6 +8,7 @@ use utoipa_axum::router::OpenApiRouter;
 use utoipa_scalar::{Scalar, Servable};
 
 use crate::{
+    config::Config,
     constant,
     domain::{
         auth::{self, http::AuthState, service::AuthService},
@@ -19,7 +20,7 @@ use crate::{
         },
         user::repository_impl::UserRepositoryImpl,
     },
-    util::{hash::hash_password, http::Json},
+    util::http::Json,
 };
 
 #[derive(OpenApi)]
@@ -30,17 +31,14 @@ use crate::{
 )]
 struct ApiDoc;
 
-pub fn new_router(db: Arc<Pool<Postgres>>) -> Router {
+pub fn new_router(config: Arc<Config>, db: Arc<Pool<Postgres>>) -> Router {
     let schema_repository = Arc::new(SchemaRepositoryImpl::new(db.clone()));
     let field_repository = Arc::new(FieldRepositoryImpl::new(db.clone()));
     let user_repository = Arc::new(UserRepositoryImpl::new(db.clone()));
 
-    let pwd = hash_password("Sevria123").unwrap();
-    log::info!("password: {}", pwd);
-
     let schema_service = Arc::new(SchemaService::new(schema_repository));
     let field_service = Arc::new(FieldService::new(field_repository));
-    let auth_service = Arc::new(AuthService::new(user_repository));
+    let auth_service = Arc::new(AuthService::new(config, user_repository));
 
     let schema_state = Arc::new(SchemaState::new(schema_service));
     let field_state = Arc::new(FieldState::new(field_service));

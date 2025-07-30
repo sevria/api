@@ -10,9 +10,9 @@ use sqlx::postgres::PgPoolOptions;
 pub async fn setup() -> Result<TestServer> {
     dotenv().ok();
 
-    let config = Config::init_from_env()?;
+    let config = Arc::new(Config::init_from_env()?);
     let db = Arc::new(PgPoolOptions::new().connect(&config.database_url).await?);
-    let router = http::new_router(db);
+    let router = http::new_router(config, db);
     let server = TestServer::new(router)?;
 
     Ok(server)

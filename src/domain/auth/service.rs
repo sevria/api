@@ -1,22 +1,30 @@
 use std::sync::Arc;
 
+use chrono::{Duration, Utc};
+
 use crate::{
-    domain::user::repository::UserRepository,
+    config::Config,
+    domain::{auth::model::Token, user::repository::UserRepository},
     util::{
         error::{self, Error},
         hash::verify_password,
+        jwt::generate_token,
     },
 };
 
 use super::model::{LoginRequest, LoginResponse};
 
 pub struct AuthService {
+    config: Arc<Config>,
     user_repository: Arc<dyn UserRepository>,
 }
 
 impl AuthService {
-    pub fn new(user_repository: Arc<dyn UserRepository>) -> AuthService {
-        AuthService { user_repository }
+    pub fn new(config: Arc<Config>, user_repository: Arc<dyn UserRepository>) -> AuthService {
+        AuthService {
+            config,
+            user_repository,
+        }
     }
 }
 
@@ -35,6 +43,17 @@ impl AuthService {
             return Err(error::unauthenticated());
         }
 
-        Ok(LoginResponse { user })
+        let access_token_expires_at =
+            Utc::now() + Duration::minutes(self.config.jwt_expires_in_minutes);
+        let access_token =
+            generate_token(&self.config.jwt_secret, user.id, access_token_expires_at)?;
+
+        Ok(LoginResponse {
+            access: Token {
+                token: access_token,
+                expires_at: access_token_expires_at,
+            },
+            user,
+        })
     }
 }
