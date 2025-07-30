@@ -2,7 +2,10 @@ use std::sync::Arc;
 
 use crate::{
     domain::user::repository::UserRepository,
-    util::error::{self, Error},
+    util::{
+        error::{self, Error},
+        hash::verify_password,
+    },
 };
 
 use super::model::{LoginRequest, LoginResponse};
@@ -26,6 +29,11 @@ impl AuthService {
                 return Err(error::internal());
             }
         };
+
+        let is_password_verified = verify_password(&user.password, &req.password)?;
+        if !is_password_verified {
+            return Err(error::unauthenticated());
+        }
 
         Ok(LoginResponse { user })
     }

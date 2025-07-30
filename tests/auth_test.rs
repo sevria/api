@@ -8,7 +8,7 @@ async fn login_success() -> Result<()> {
     let server = common::setup().await?;
     let req = json!({
         "email": "admin@example.com",
-        "password": "secret",
+        "password": "Sevria123",
     });
     let res = server.post("/auth/login").json(&req).await;
 

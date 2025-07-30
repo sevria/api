@@ -19,7 +19,7 @@ use crate::{
         },
         user::repository_impl::UserRepositoryImpl,
     },
-    util::http::Json,
+    util::{hash::hash_password, http::Json},
 };
 
 #[derive(OpenApi)]
@@ -34,6 +34,9 @@ pub fn new_router(db: Arc<Pool<Postgres>>) -> Router {
     let schema_repository = Arc::new(SchemaRepositoryImpl::new(db.clone()));
     let field_repository = Arc::new(FieldRepositoryImpl::new(db.clone()));
     let user_repository = Arc::new(UserRepositoryImpl::new(db.clone()));
+
+    let pwd = hash_password("Sevria123").unwrap();
+    log::info!("password: {}", pwd);
 
     let schema_service = Arc::new(SchemaService::new(schema_repository));
     let field_service = Arc::new(FieldService::new(field_repository));
