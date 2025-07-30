@@ -1,4 +1,5 @@
 {
     "editor.formatOnSave": true,
-    "editor.inlayHints.enabled": "off"
+    "editor.inlayHints.enabled": "off",
+    "files.insertFinalNewline": true
 }
