@@ -8,7 +8,7 @@ use crate::{
         model::{Field, UpdateFieldRequest},
         repository::FieldRepository,
     },
-    util::error::{self, Error},
+    util::error::Error,
 };
 
 pub struct FieldRepositoryImpl {
@@ -25,9 +25,11 @@ impl FieldRepositoryImpl {
 impl FieldRepository for FieldRepositoryImpl {
     async fn create(&self, data: &Field) -> Result<Field, Error> {
         let mut query = QueryBuilder::new(
-            "INSERT INTO fields (name, value_type, required, default_value) VALUES (",
+            "INSERT INTO fields (schema_id, name, value_type, required, default_value) VALUES (",
         );
 
+        query.push_bind(&data.schema_id);
+        query.push(", ");
         query.push_bind(&data.name);
         query.push(", ");
         query.push_bind(&data.value_type);
@@ -41,12 +43,12 @@ impl FieldRepository for FieldRepositoryImpl {
             Ok(field) => Ok(field),
             Err(err) => {
                 log::error!("failed to create field: {}", err);
-                Err(error::internal())
+                Err(Error::Internal)
             }
         }
     }
 
-    async fn list(&self, schema_id: i64) -> Result<Vec<Field>, Error> {
+    async fn list(&self, schema_id: &str) -> Result<Vec<Field>, Error> {
         let mut query = QueryBuilder::new("SELECT * FROM fields");
 
         query.push(" WHERE schema_id = ");
@@ -57,7 +59,7 @@ impl FieldRepository for FieldRepositoryImpl {
             Ok(fields) => Ok(fields),
             Err(err) => {
                 log::error!("failed to list fields: {}", err);
-                return Err(error::internal());
+                return Err(Error::Internal);
             }
         }
     }
@@ -82,12 +84,12 @@ impl FieldRepository for FieldRepositoryImpl {
             Ok(field) => Ok(field),
             Err(err) => {
                 log::error!("failed to update field: {}", err);
-                return Err(error::internal());
+                return Err(Error::Internal);
             }
         }
     }
 
-    async fn delete(&self, schema_id: i64, name: &str) -> Result<Field, Error> {
+    async fn delete(&self, schema_id: &str, name: &str) -> Result<Field, Error> {
         let mut query = QueryBuilder::new("DELETE FROM fields WHERE schema_id = ");
         query.push_bind(&schema_id);
         query.push(" AND name = ");
@@ -98,7 +100,7 @@ impl FieldRepository for FieldRepositoryImpl {
             Ok(field) => Ok(field),
             Err(err) => {
                 log::error!("failed to delete field: {}", err);
-                return Err(error::internal());
+                return Err(Error::Internal);
             }
         }
     }

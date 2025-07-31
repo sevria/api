@@ -4,6 +4,13 @@ use utoipa::ToSchema;
 
 use crate::domain::user::model::User;
 
+#[derive(Deserialize, Serialize, ToSchema)]
+pub struct Token {
+    pub token: String,
+    #[schema(format = "date-time")]
+    pub expires_at: DateTime<Utc>,
+}
+
 #[derive(Deserialize, ToSchema)]
 pub struct LoginRequest {
     pub email: String,
@@ -16,9 +23,8 @@ pub struct LoginResponse {
     pub user: User,
 }
 
-#[derive(Deserialize, Serialize, ToSchema)]
-pub struct Token {
+#[derive(Deserialize, ToSchema)]
+pub struct RefreshTokenRequest {
     pub token: String,
-    #[schema(format = "date-time")]
-    pub expires_at: DateTime<Utc>,
+    pub user_id: i64,
 }

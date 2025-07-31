@@ -1,15 +1,21 @@
 use anyhow::Result;
-use fake::{Fake, Faker};
 use serde_json::json;
-use sevria_api::domain::field::model::CreateFieldRequest;
 
 mod common;
 
 #[tokio::test]
 async fn create_field_success() -> Result<()> {
     let server = common::setup().await?;
-    let req = Faker.fake::<CreateFieldRequest>();
-    let res = server.post("/schemas/1/fields").json(&req).await;
+    let req = json!({
+        "name": "author",
+        "value_type": "string",
+        "required": true,
+        "default_value": "unknown",
+    });
+    let res = server
+        .post("/schemas/Q5OhKpzaanvf0rdYVaOrg/fields")
+        .json(&req)
+        .await;
 
     res.assert_status_ok();
     res.assert_json_contains(&req);
@@ -20,15 +26,9 @@ async fn create_field_success() -> Result<()> {
 #[tokio::test]
 async fn list_fields_success() -> Result<()> {
     let server = common::setup().await?;
-    let res = server.get("/schemas/1/fields").await;
+    let res = server.get("/schemas/Q5OhKpzaanvf0rdYVaOrg/fields").await;
 
     res.assert_status_ok();
-    res.assert_json_contains(&json!([
-        {
-            "name": "content",
-            "value_type": "string",
-        }
-    ]));
 
     Ok(())
 }

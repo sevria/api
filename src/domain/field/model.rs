@@ -6,7 +6,7 @@ use utoipa::ToSchema;
 #[derive(Clone, Debug, Deserialize, Dummy, FromRow, Serialize, ToSchema)]
 pub struct Field {
     #[serde(skip)]
-    pub schema_id: i64,
+    pub schema_id: String,
     pub name: String,
     pub value_type: String,
     pub required: bool,
@@ -15,7 +15,7 @@ pub struct Field {
 
 impl Field {
     pub fn new(
-        schema_id: i64,
+        schema_id: String,
         name: String,
         value_type: String,
         required: bool,
@@ -34,7 +34,7 @@ impl Field {
 #[derive(Deserialize, Dummy, Serialize, ToSchema)]
 pub struct CreateFieldRequest {
     #[serde(skip)]
-    pub schema_id: i64,
+    pub schema_id: String,
     pub name: String,
     pub value_type: String,
     pub required: bool,
@@ -43,7 +43,7 @@ pub struct CreateFieldRequest {
 
 #[derive(Deserialize, ToSchema)]
 pub struct UpdateFieldRequest {
-    pub schema_id: Option<i64>,
+    pub schema_id: Option<String>,
     pub name: Option<String>,
     pub value_type: Option<String>,
     pub required: Option<bool>,

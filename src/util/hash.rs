@@ -6,7 +6,7 @@ use argon2::{
     },
 };
 
-use crate::util::error::{self, Error};
+use crate::util::error::Error;
 
 pub fn hash_password(password: &str) -> Result<String, Error> {
     let salt = SaltString::generate(&mut OsRng);
@@ -16,7 +16,7 @@ pub fn hash_password(password: &str) -> Result<String, Error> {
         Ok(hash) => Ok(hash.to_string()),
         Err(err) => {
             log::error!("failed to hash password: {}", err);
-            Err(error::internal())
+            Err(Error::Internal)
         }
     }
 }
@@ -28,7 +28,7 @@ pub fn verify_password(hash: &str, password: &str) -> Result<bool, Error> {
         Ok(hash) => hash,
         Err(err) => {
             log::error!("failed to parse hash: {}", err);
-            return Err(error::internal());
+            return Err(Error::Internal);
         }
     };
 
@@ -37,7 +37,7 @@ pub fn verify_password(hash: &str, password: &str) -> Result<bool, Error> {
         Err(HashError::Password) => Ok(false),
         Err(err) => {
             log::error!("failed to verify password: {}", err);
-            Err(error::internal())
+            Err(Error::Internal)
         }
     }
 }

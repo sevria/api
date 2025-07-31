@@ -5,7 +5,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     constant,
-    domain::auth::model::{LoginRequest, LoginResponse},
+    domain::auth::model::{LoginRequest, LoginResponse, RefreshTokenRequest},
     util::{error::Error, http::Json},
 };
 
@@ -24,10 +24,10 @@ impl AuthState {
 pub fn router(state: Arc<AuthState>) -> OpenApiRouter {
     OpenApiRouter::new()
         .routes(routes!(login))
+        .routes(routes!(refresh))
         .with_state(state)
 }
 
-#[axum::debug_handler]
 #[utoipa::path(
     post,
     path = "/login",
@@ -43,5 +43,23 @@ async fn login(
     Json(req): Json<LoginRequest>,
 ) -> Result<Json<LoginResponse>, Error> {
     let res = state.auth_service.login(&req).await?;
+    Ok(Json(res))
+}
+
+#[utoipa::path(
+    post,
+    path = "/refresh",
+    summary = "Refresh token",
+    tag = constant::TAG_AUTH,
+    request_body = RefreshTokenRequest,
+    responses(
+        (status = 200, body = LoginResponse)
+    )
+)]
+async fn refresh(
+    State(state): State<Arc<AuthState>>,
+    Json(req): Json<RefreshTokenRequest>,
+) -> Result<Json<LoginResponse>, Error> {
+    let res = state.auth_service.refresh(&req).await?;
     Ok(Json(res))
 }

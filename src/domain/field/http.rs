@@ -35,7 +35,7 @@ pub fn router(state: Arc<FieldState>) -> OpenApiRouter {
     summary = "Create field",
     tag = constant::TAG_FIELD,
     params(
-        ("schema_id" = i64, Path)
+        ("schema_id" = String, Path)
     ),
     request_body = CreateFieldRequest,
     responses(
@@ -44,7 +44,7 @@ pub fn router(state: Arc<FieldState>) -> OpenApiRouter {
 )]
 async fn create(
     State(state): State<Arc<FieldState>>,
-    Path(schema_id): Path<i64>,
+    Path(schema_id): Path<String>,
     Json(mut req): Json<CreateFieldRequest>,
 ) -> Result<Json<Field>, Error> {
     req.schema_id = schema_id;
@@ -58,7 +58,7 @@ async fn create(
     summary = "List fields",
     tag = constant::TAG_FIELD,
     params(
-        ("schema_id" = i64, Path)
+        ("schema_id" = String, Path)
     ),
     responses(
         (status = 200, body = Paginated<Field>)
@@ -66,7 +66,7 @@ async fn create(
 )]
 async fn list(
     State(state): State<Arc<FieldState>>,
-    Path(schema_id): Path<i64>,
+    Path(schema_id): Path<String>,
 ) -> Result<Json<Vec<Field>>, Error> {
     Ok(Json(state.field_service.list(schema_id).await?))
 }

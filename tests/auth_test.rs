@@ -15,7 +15,7 @@ async fn login_success() -> Result<()> {
     res.assert_status_ok();
     res.assert_json_contains(&json!({
         "user": {
-            "id": 1,
+            "id": "spCe6NvSJ1W2uyybeRIZv",
             "email": "admin@example.com",
         }
     }));

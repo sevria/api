@@ -1,7 +1,7 @@
 INSERT INTO fields
     (schema_id, name, value_type, required, default_value)
 VALUES
-    (1, 'title', 'string', true, null),
-    (1, 'content', 'string', true, null),
-    (2, 'content', 'string', true, null),
-    (3, 'html', 'string', true, null);
+    ('Q5OhKpzaanvf0rdYVaOrg', 'title', 'string', true, null),
+    ('Q5OhKpzaanvf0rdYVaOrg', 'content', 'string', true, null),
+    ('PmEQ33frGUZEKvUH6x12q', 'content', 'string', true, null),
+    ('CYLm9ENmzNoIKLIQXJw_Q', 'html', 'string', true, null);

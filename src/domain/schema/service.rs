@@ -28,7 +28,7 @@ impl SchemaService {
         self.schema_repository.list().await
     }
 
-    pub async fn get(&self, id: i64) -> Result<Schema, Error> {
+    pub async fn get(&self, id: &str) -> Result<Schema, Error> {
         self.schema_repository.get(id).await
     }
 }

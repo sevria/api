@@ -75,9 +75,9 @@ async fn list(State(state): State<Arc<SchemaState>>) -> Result<Json<Paginated<Sc
 )]
 async fn get(
     State(state): State<Arc<SchemaState>>,
-    Path(id): Path<i64>,
+    Path(id): Path<String>,
 ) -> Result<Json<Schema>, Error> {
-    Ok(Json(state.schema_service.get(id).await?))
+    Ok(Json(state.schema_service.get(&id).await?))
 }
 
 #[utoipa::path(
@@ -86,14 +86,14 @@ async fn get(
     summary = "Update schema",
     tag = constant::TAG_SCHEMA,
     params(
-        ("id" = i64, Path)
+        ("id" = String, Path)
     ),
     request_body = UpdateSchemaRequest,
     responses(
         (status = 200, body = Schema)
     )
 )]
-async fn update(Path(id): Path<i64>, Json(req): Json<UpdateSchemaRequest>) -> Json<Schema> {
+async fn update(Path(id): Path<String>, Json(req): Json<UpdateSchemaRequest>) -> Json<Schema> {
     Json(Schema {
         id,
         name: req.name.unwrap_or_default(),
@@ -107,16 +107,16 @@ async fn update(Path(id): Path<i64>, Json(req): Json<UpdateSchemaRequest>) -> Js
     summary = "Delete schema",
     tag = constant::TAG_SCHEMA,
     params(
-        ("id" = i64, Path)
+        ("id" = String, Path)
     ),
     responses(
         (status = 200, body = Schema)
     )
 )]
-async fn delete(Path(id): Path<i64>) -> Json<Schema> {
+async fn delete(Path(id): Path<String>) -> Json<Schema> {
     Json(Schema {
         id,
-        name: format!("Name of {}", id),
+        name: "".to_string(),
         fields: vec![],
     })
 }

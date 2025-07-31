@@ -3,7 +3,7 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use sqlx::{Pool, Postgres, QueryBuilder};
 
-use crate::util::error::{self, Error};
+use crate::util::error::Error;
 
 use super::{model::User, repository::UserRepository};
 
@@ -33,7 +33,7 @@ impl UserRepository for UserRepositoryImpl {
             Ok(user) => Ok(user),
             Err(err) => {
                 log::error!("failed to create user: {}", err);
-                Err(error::internal_with_message(format!("{}", err).as_str()))
+                Err(Error::Internal)
             }
         }
     }
@@ -45,7 +45,7 @@ impl UserRepository for UserRepositoryImpl {
             Ok(user) => Ok(user),
             Err(err) => {
                 log::error!("failed to get user by email: {}", err);
-                return Err(error::internal());
+                return Err(Error::Internal);
             }
         }
     }

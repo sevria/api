@@ -8,10 +8,7 @@ use crate::{
         model::{Schema, UpdateSchemaRequest},
         repository::SchemaRepository,
     },
-    util::{
-        error::{self, Error},
-        paginator::Paginated,
-    },
+    util::{error::Error, paginator::Paginated},
 };
 
 pub struct SchemaRepositoryImpl {
@@ -27,8 +24,20 @@ impl SchemaRepositoryImpl {
 #[async_trait]
 impl SchemaRepository for SchemaRepositoryImpl {
     async fn create(&self, data: &Schema) -> Result<Schema, Error> {
-        let mut query = QueryBuilder::new("INSERT INTO schemas (name) VALUES (");
+        match self.get_by_name(&data.name).await {
+            Ok(_) => {
+                return Err(Error::AlreadyPresent);
+            }
+            Err(Error::NotFound) => {}
+            Err(err) => {
+                return Err(err);
+            }
+        }
 
+        let mut query = QueryBuilder::new("INSERT INTO schemas (id, name) VALUES (");
+
+        query.push_bind(&data.id);
+        query.push(", ");
         query.push_bind(&data.name);
         query.push(") RETURNING *");
 
@@ -36,7 +45,7 @@ impl SchemaRepository for SchemaRepositoryImpl {
             Ok(schema) => Ok(schema),
             Err(err) => {
                 log::error!("failed to create schema: {}", err);
-                Err(error::internal_with_message(format!("{}", err).as_str()))
+                Err(Error::Internal)
             }
         }
     }
@@ -48,7 +57,7 @@ impl SchemaRepository for SchemaRepositoryImpl {
             Ok(schemas) => schemas,
             Err(err) => {
                 log::error!("failed to get schemas: {}", err);
-                return Err(error::internal());
+                return Err(Error::Internal);
             }
         };
 
@@ -60,14 +69,27 @@ impl SchemaRepository for SchemaRepositoryImpl {
         })
     }
 
-    async fn get(&self, id: i64) -> Result<Schema, Error> {
+    async fn get(&self, id: &str) -> Result<Schema, Error> {
         let query = sqlx::query_as::<_, Schema>("SELECT * FROM schemas WHERE id = $1").bind(id);
 
         match query.fetch_one(&*self.db).await {
             Ok(schema) => Ok(schema),
             Err(err) => {
                 log::error!("failed to get schema: {}", err);
-                return Err(error::internal());
+                return Err(Error::Internal);
+            }
+        }
+    }
+
+    async fn get_by_name(&self, name: &str) -> Result<Schema, Error> {
+        let query = sqlx::query_as::<_, Schema>("SELECT * FROM schemas WHERE name = $1").bind(name);
+
+        match query.fetch_one(&*self.db).await {
+            Ok(schema) => Ok(schema),
+            Err(sqlx::Error::RowNotFound) => Err(Error::NotFound),
+            Err(err) => {
+                log::error!("failed to get schema by name: {}", err);
+                return Err(Error::Internal);
             }
         }
     }
@@ -90,12 +112,12 @@ impl SchemaRepository for SchemaRepositoryImpl {
             Ok(schema) => Ok(schema),
             Err(err) => {
                 log::error!("failed to update schema: {}", err);
-                return Err(error::internal());
+                return Err(Error::Internal);
             }
         }
     }
 
-    async fn delete(&self, id: i64) -> Result<Schema, Error> {
+    async fn delete(&self, id: &str) -> Result<Schema, Error> {
         let mut query = QueryBuilder::new("DELETE FROM schemas WHERE id = ");
         query.push_bind(&id);
         query.push(" RETURNING *");
@@ -104,7 +126,7 @@ impl SchemaRepository for SchemaRepositoryImpl {
             Ok(schema) => Ok(schema),
             Err(err) => {
                 log::error!("failed to delete schema: {}", err);
-                return Err(error::internal());
+                return Err(Error::Internal);
             }
         }
     }

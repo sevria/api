@@ -1,8 +1,6 @@
 INSERT INTO schemas
     (id, name)
 VALUES
-    (1, 'posts'),
-    (2, 'comments'),
-    (3, 'old_posts');
-
-SELECT setval('schemas_id_seq', (SELECT MAX(id) FROM schemas));
+    ('Q5OhKpzaanvf0rdYVaOrg', 'posts'),
+    ('PmEQ33frGUZEKvUH6x12q', 'comments'),
+    ('CYLm9ENmzNoIKLIQXJw_Q', 'old_posts');

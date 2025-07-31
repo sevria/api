@@ -6,10 +6,10 @@ use axum::{
 use serde::Serialize;
 use serde_json::json;
 
-use super::error;
+use crate::util::error::Error;
 
 #[derive(FromRequest)]
-#[from_request(via(axum::Json), rejection(error::Error))]
+#[from_request(via(axum::Json), rejection(Error))]
 pub struct Json<T>(pub T);
 
 impl<T: Serialize> IntoResponse for Json<T> {
@@ -19,17 +19,25 @@ impl<T: Serialize> IntoResponse for Json<T> {
     }
 }
 
-impl From<JsonRejection> for error::Error {
+impl From<JsonRejection> for Error {
     fn from(err: JsonRejection) -> Self {
-        error::invalid_argument_with_message(&err.to_string())
+        Error::InvalidArgument(err.to_string())
     }
 }
 
-impl IntoResponse for error::Error {
+impl IntoResponse for Error {
     fn into_response(self) -> Response {
-        let code = StatusCode::from_u16(self.code).unwrap_or(StatusCode::INTERNAL_SERVER_ERROR);
+        let code = match self {
+            Error::AlreadyPresent => StatusCode::CONFLICT,
+            Error::InvalidArgument(_) => StatusCode::BAD_REQUEST,
+            Error::NotFound => StatusCode::NOT_FOUND,
+            Error::PermissionDenied => StatusCode::FORBIDDEN,
+            Error::Unauthenticated => StatusCode::UNAUTHORIZED,
+            _ => StatusCode::INTERNAL_SERVER_ERROR,
+        };
+
         let payload = json!({
-            "message": self.message,
+            "message": self.to_string(),
         });
 
         (code, axum::Json(payload)).into_response()

@@ -21,7 +21,7 @@ impl FieldService {
 impl FieldService {
     pub async fn create(&self, req: &CreateFieldRequest) -> Result<Field, Error> {
         let data = Field::new(
-            req.schema_id,
+            req.schema_id.clone(),
             req.name.clone(),
             req.value_type.clone(),
             req.required,
@@ -30,7 +30,7 @@ impl FieldService {
         self.field_repository.create(&data).await
     }
 
-    pub async fn list(&self, schema_id: i64) -> Result<Vec<Field>, Error> {
-        self.field_repository.list(schema_id).await
+    pub async fn list(&self, schema_id: String) -> Result<Vec<Field>, Error> {
+        self.field_repository.list(&schema_id).await
     }
 }

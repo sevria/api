@@ -1,4 +1,5 @@
 use fake::Dummy;
+use nanoid::nanoid;
 use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
 use utoipa::ToSchema;
@@ -7,7 +8,7 @@ use crate::domain::field::model::Field;
 
 #[derive(Clone, FromRow, Serialize, ToSchema)]
 pub struct Schema {
-    pub id: i64,
+    pub id: String,
     pub name: String,
     #[sqlx(skip)]
     pub fields: Vec<Field>,
@@ -16,7 +17,7 @@ pub struct Schema {
 impl Schema {
     pub fn new(name: String) -> Schema {
         Schema {
-            id: 0,
+            id: nanoid!(),
             name,
             fields: vec![],
         }

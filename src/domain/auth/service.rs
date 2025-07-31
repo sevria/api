@@ -4,12 +4,11 @@ use chrono::{Duration, Utc};
 
 use crate::{
     config::Config,
-    domain::{auth::model::Token, user::repository::UserRepository},
-    util::{
-        error::{self, Error},
-        hash::verify_password,
-        jwt::generate_token,
+    domain::{
+        auth::model::{RefreshTokenRequest, Token},
+        user::repository::UserRepository,
     },
+    util::{error::Error, hash::verify_password, jwt::generate_token},
 };
 
 use super::model::{LoginRequest, LoginResponse};
@@ -34,19 +33,19 @@ impl AuthService {
             Ok(user) => user,
             Err(err) => {
                 log::error!("failed to get user by email: {}", err);
-                return Err(error::internal());
+                return Err(Error::Internal);
             }
         };
 
         let is_password_verified = verify_password(&user.password, &req.password)?;
         if !is_password_verified {
-            return Err(error::unauthenticated());
+            return Err(Error::Unauthenticated);
         }
 
         let access_token_expires_at =
             Utc::now() + Duration::minutes(self.config.jwt_expires_in_minutes);
         let access_token =
-            generate_token(&self.config.jwt_secret, user.id, access_token_expires_at)?;
+            generate_token(&self.config.jwt_secret, &user.id, access_token_expires_at)?;
 
         Ok(LoginResponse {
             access: Token {
@@ -55,5 +54,9 @@ impl AuthService {
             },
             user,
         })
+    }
+
+    pub async fn refresh(&self, _: &RefreshTokenRequest) -> Result<LoginResponse, Error> {
+        todo!()
     }
 }
