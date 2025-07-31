@@ -20,6 +20,7 @@ pub struct LoginRequest {
 #[derive(Serialize, ToSchema)]
 pub struct LoginResponse {
     pub access: Token,
+    pub refresh: Token,
     pub user: User,
 }
 

@@ -18,6 +18,7 @@ use crate::{
         schema::{
             self, http::SchemaState, repository_impl::SchemaRepositoryImpl, service::SchemaService,
         },
+        session::repository_impl::SessionRepositoryImpl,
         user::repository_impl::UserRepositoryImpl,
     },
     util::http::Json,
@@ -34,11 +35,16 @@ struct ApiDoc;
 pub fn new_router(config: Arc<Config>, db: Arc<Pool<Postgres>>) -> Router {
     let schema_repository = Arc::new(SchemaRepositoryImpl::new(db.clone()));
     let field_repository = Arc::new(FieldRepositoryImpl::new(db.clone()));
+    let session_repository = Arc::new(SessionRepositoryImpl::new(db.clone()));
     let user_repository = Arc::new(UserRepositoryImpl::new(db.clone()));
 
     let schema_service = Arc::new(SchemaService::new(schema_repository));
     let field_service = Arc::new(FieldService::new(field_repository));
-    let auth_service = Arc::new(AuthService::new(config, user_repository));
+    let auth_service = Arc::new(AuthService::new(
+        config,
+        session_repository,
+        user_repository,
+    ));
 
     let schema_state = Arc::new(SchemaState::new(schema_service));
     let field_state = Arc::new(FieldState::new(field_service));
