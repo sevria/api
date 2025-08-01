@@ -1,4 +1,4 @@
-INSERT INTO schemas
+INSERT INTO sevria_schemas
     (id, name)
 VALUES
     ('Q5OhKpzaanvf0rdYVaOrg', 'posts'),

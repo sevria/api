@@ -34,7 +34,7 @@ impl SchemaRepository for SchemaRepositoryImpl {
             }
         }
 
-        let mut query = QueryBuilder::new("INSERT INTO schemas (id, name) VALUES (");
+        let mut query = QueryBuilder::new("INSERT INTO sevria_schemas (id, name) VALUES (");
 
         query.push_bind(&data.id);
         query.push(", ");
@@ -66,7 +66,7 @@ impl SchemaRepository for SchemaRepositoryImpl {
     }
 
     async fn list(&self) -> Result<Paginated<Schema>, Error> {
-        let query = sqlx::query_as::<_, Schema>("SELECT * FROM schemas ORDER BY name ASC");
+        let query = sqlx::query_as::<_, Schema>("SELECT * FROM sevria_schemas ORDER BY name ASC");
 
         let schemas = match query.fetch_all(&*self.db).await {
             Ok(schemas) => schemas,
@@ -85,7 +85,8 @@ impl SchemaRepository for SchemaRepositoryImpl {
     }
 
     async fn get(&self, id: &str) -> Result<Schema, Error> {
-        let query = sqlx::query_as::<_, Schema>("SELECT * FROM schemas WHERE id = $1").bind(id);
+        let query =
+            sqlx::query_as::<_, Schema>("SELECT * FROM sevria_schemas WHERE id = $1").bind(id);
 
         match query.fetch_one(&*self.db).await {
             Ok(schema) => Ok(schema),
@@ -97,7 +98,8 @@ impl SchemaRepository for SchemaRepositoryImpl {
     }
 
     async fn get_by_name(&self, name: &str) -> Result<Schema, Error> {
-        let query = sqlx::query_as::<_, Schema>("SELECT * FROM schemas WHERE name = $1").bind(name);
+        let query =
+            sqlx::query_as::<_, Schema>("SELECT * FROM sevria_schemas WHERE name = $1").bind(name);
 
         match query.fetch_one(&*self.db).await {
             Ok(schema) => Ok(schema),
@@ -110,7 +112,7 @@ impl SchemaRepository for SchemaRepositoryImpl {
     }
 
     async fn update(&self, data: &UpdateSchemaRequest) -> Result<Schema, Error> {
-        let mut query = QueryBuilder::new("UPDATE schemas SET");
+        let mut query = QueryBuilder::new("UPDATE sevria_schemas SET");
         query.push(" id = ");
         query.push_bind(&data.id);
 
@@ -133,7 +135,7 @@ impl SchemaRepository for SchemaRepositoryImpl {
     }
 
     async fn delete(&self, id: &str) -> Result<Schema, Error> {
-        let mut query = QueryBuilder::new("DELETE FROM schemas WHERE id = ");
+        let mut query = QueryBuilder::new("DELETE FROM sevria_schemas WHERE id = ");
         query.push_bind(&id);
         query.push(" RETURNING *");
 

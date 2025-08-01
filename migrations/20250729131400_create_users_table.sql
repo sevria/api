@@ -1,4 +1,4 @@
-CREATE TABLE users (
+CREATE TABLE sevria_users (
     id CHAR(21) PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
     email VARCHAR(50) NOT NULL UNIQUE,

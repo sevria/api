@@ -23,8 +23,9 @@ impl UserRepositoryImpl {
 #[async_trait]
 impl UserRepository for UserRepositoryImpl {
     async fn create(&self, data: &User) -> Result<User, Error> {
-        let mut query =
-            QueryBuilder::new("INSERT INTO users (id, name, email, password, status) VALUES (");
+        let mut query = QueryBuilder::new(
+            "INSERT INTO sevria_users (id, name, email, password, status) VALUES (",
+        );
 
         query.push_bind(&data.id);
         query.push(", ");
@@ -47,7 +48,7 @@ impl UserRepository for UserRepositoryImpl {
     }
 
     async fn get(&self, req: &GetUserRequest) -> Result<User, Error> {
-        let mut query = QueryBuilder::new("SELECT * FROM users WHERE");
+        let mut query = QueryBuilder::new("SELECT * FROM sevria_users WHERE");
 
         match req {
             GetUserRequest::Id(id) => {
@@ -71,7 +72,7 @@ impl UserRepository for UserRepositoryImpl {
     }
 
     async fn count(&self) -> Result<i64, Error> {
-        match sqlx::query_scalar("SELECT COUNT(*) FROM users")
+        match sqlx::query_scalar("SELECT COUNT(*) FROM sevria_users")
             .fetch_one(&*self.db)
             .await
         {

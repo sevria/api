@@ -1,14 +1,12 @@
 use anyhow::Result;
-use fake::{Fake, Faker};
 use serde_json::json;
-use sevria_api::domain::schema::model::CreateSchemaRequest;
 
 mod common;
 
 #[tokio::test]
 async fn create_schema_success() -> Result<()> {
     let server = common::setup().await?;
-    let req = Faker.fake::<CreateSchemaRequest>();
+    let req = json!({ "name": "my_schema" });
     let res = server.post("/schemas").json(&req).await;
 
     res.assert_status_ok();

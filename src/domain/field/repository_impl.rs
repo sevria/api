@@ -25,7 +25,7 @@ impl FieldRepositoryImpl {
 impl FieldRepository for FieldRepositoryImpl {
     async fn create(&self, data: Field) -> Result<Field, Error> {
         let mut query = QueryBuilder::new(
-            "INSERT INTO fields (schema_id, name, value_type, required, default_value) VALUES (",
+            "INSERT INTO sevria_fields (schema_id, name, value_type, required, default_value) VALUES (",
         );
 
         query.push_bind(&data.schema_id);
@@ -49,7 +49,7 @@ impl FieldRepository for FieldRepositoryImpl {
     }
 
     async fn list(&self, schema_id: String) -> Result<Vec<Field>, Error> {
-        let mut query = QueryBuilder::new("SELECT * FROM fields");
+        let mut query = QueryBuilder::new("SELECT * FROM sevria_fields");
 
         query.push(" WHERE schema_id = ");
         query.push_bind(&schema_id);
@@ -65,7 +65,7 @@ impl FieldRepository for FieldRepositoryImpl {
     }
 
     async fn update(&self, data: UpdateFieldRequest) -> Result<Field, Error> {
-        let mut query = QueryBuilder::new("UPDATE fields SET");
+        let mut query = QueryBuilder::new("UPDATE sevria_fields SET");
         query.push(" name = ");
         query.push_bind(&data.name);
 
@@ -90,7 +90,7 @@ impl FieldRepository for FieldRepositoryImpl {
     }
 
     async fn delete(&self, schema_id: String, name: String) -> Result<Field, Error> {
-        let mut query = QueryBuilder::new("DELETE FROM fields WHERE schema_id = ");
+        let mut query = QueryBuilder::new("DELETE FROM sevria_fields WHERE schema_id = ");
         query.push_bind(&schema_id);
         query.push(" AND name = ");
         query.push_bind(name);

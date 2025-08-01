@@ -24,8 +24,9 @@ impl SessionRepositoryImpl {
 #[async_trait]
 impl SessionRepository for SessionRepositoryImpl {
     async fn create(&self, data: &Session) -> Result<Session, Error> {
-        let mut query =
-            QueryBuilder::new("INSERT INTO sessions (id, token, user_id, expires_at) VALUES (");
+        let mut query = QueryBuilder::new(
+            "INSERT INTO sevria_sessions (id, token, user_id, expires_at) VALUES (",
+        );
 
         query.push_bind(&data.id);
         query.push(", ");
@@ -46,7 +47,7 @@ impl SessionRepository for SessionRepositoryImpl {
     }
 
     async fn get(&self, token: &str, user_id: &str) -> Result<Session, Error> {
-        let mut query = QueryBuilder::new("SELECT * FROM sessions WHERE ");
+        let mut query = QueryBuilder::new("SELECT * FROM sevria_sessions WHERE ");
 
         query.push("token = ");
         query.push_bind(token);
@@ -64,7 +65,7 @@ impl SessionRepository for SessionRepositoryImpl {
     }
 
     async fn update(&self, id: &str, data: &UpdateSessionRequest) -> Result<Session, Error> {
-        let mut query = QueryBuilder::new("UPDATE sessions SET updated_at = NOW()");
+        let mut query = QueryBuilder::new("UPDATE sevria_sessions SET updated_at = NOW()");
 
         if let Some(token) = &data.token {
             query.push(", token = ");

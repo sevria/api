@@ -1,4 +1,4 @@
-INSERT INTO fields
+INSERT INTO sevria_fields
     (schema_id, name, value_type, required, default_value)
 VALUES
     ('Q5OhKpzaanvf0rdYVaOrg', 'title', 'string', true, null),
