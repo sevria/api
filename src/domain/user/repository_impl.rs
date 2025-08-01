@@ -23,19 +23,24 @@ impl UserRepositoryImpl {
 #[async_trait]
 impl UserRepository for UserRepositoryImpl {
     async fn create(&self, data: &User) -> Result<User, Error> {
-        let mut query = QueryBuilder::new("INSERT INTO users (name, email, password) VALUES (");
+        let mut query =
+            QueryBuilder::new("INSERT INTO users (id, name, email, password, status) VALUES (");
 
+        query.push_bind(&data.id);
+        query.push(", ");
         query.push_bind(&data.name);
         query.push(", ");
         query.push_bind(&data.email);
         query.push(", ");
         query.push_bind(&data.password);
+        query.push(", ");
+        query.push_bind(&data.status);
         query.push(") RETURNING *");
 
         match query.build_query_as::<User>().fetch_one(&*self.db).await {
             Ok(user) => Ok(user),
             Err(err) => {
-                log::error!("failed to create user: {}", err);
+                log::error!("Failed to create user: {}", err);
                 Err(Error::Internal)
             }
         }
@@ -59,8 +64,21 @@ impl UserRepository for UserRepositoryImpl {
             Ok(user) => Ok(user),
             Err(sqlx::Error::RowNotFound) => Err(Error::NotFound),
             Err(err) => {
-                log::error!("failed to get user: {}", err);
+                log::error!("Failed to get user: {}", err);
                 return Err(Error::Internal);
+            }
+        }
+    }
+
+    async fn count(&self) -> Result<i64, Error> {
+        match sqlx::query_scalar("SELECT COUNT(*) FROM users")
+            .fetch_one(&*self.db)
+            .await
+        {
+            Ok(count) => Ok(count),
+            Err(err) => {
+                log::error!("Failed to count users: {}", err);
+                Err(Error::Internal)
             }
         }
     }

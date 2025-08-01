@@ -8,4 +8,5 @@ use super::model::{GetUserRequest, User};
 pub trait UserRepository: Send + Sync {
     async fn create(&self, data: &User) -> Result<User, Error>;
     async fn get(&self, req: &GetUserRequest) -> Result<User, Error>;
+    async fn count(&self) -> Result<i64, Error>;
 }

@@ -2,24 +2,17 @@ use std::sync::Arc;
 
 use axum::{Router, routing::get};
 use serde::Serialize;
-use sqlx::{Pool, Postgres};
 use utoipa::OpenApi;
 use utoipa_axum::router::OpenApiRouter;
 use utoipa_scalar::{Scalar, Servable};
 
 use crate::{
-    config::Config,
     constant,
+    context::Context,
     domain::{
-        auth::{self, http::AuthState, service::AuthService},
-        field::{
-            self, http::FieldState, repository_impl::FieldRepositoryImpl, service::FieldService,
-        },
-        schema::{
-            self, http::SchemaState, repository_impl::SchemaRepositoryImpl, service::SchemaService,
-        },
-        session::repository_impl::SessionRepositoryImpl,
-        user::repository_impl::UserRepositoryImpl,
+        auth::{self, http::AuthState},
+        field::{self, http::FieldState},
+        schema::{self, http::SchemaState},
     },
     util::http::Json,
 };
@@ -32,23 +25,10 @@ use crate::{
 )]
 struct ApiDoc;
 
-pub fn new_router(config: Arc<Config>, db: Arc<Pool<Postgres>>) -> Router {
-    let schema_repository = Arc::new(SchemaRepositoryImpl::new(db.clone()));
-    let field_repository = Arc::new(FieldRepositoryImpl::new(db.clone()));
-    let session_repository = Arc::new(SessionRepositoryImpl::new(db.clone()));
-    let user_repository = Arc::new(UserRepositoryImpl::new(db.clone()));
-
-    let schema_service = Arc::new(SchemaService::new(schema_repository));
-    let field_service = Arc::new(FieldService::new(field_repository));
-    let auth_service = Arc::new(AuthService::new(
-        config,
-        session_repository,
-        user_repository,
-    ));
-
-    let schema_state = Arc::new(SchemaState::new(schema_service));
-    let field_state = Arc::new(FieldState::new(field_service));
-    let auth_state = Arc::new(AuthState::new(auth_service));
+pub fn new_router(context: Context) -> Router {
+    let schema_state = Arc::new(SchemaState::new(context.schema_service));
+    let field_state = Arc::new(FieldState::new(context.field_service));
+    let auth_state = Arc::new(AuthState::new(context.auth_service));
 
     let (router, api) = OpenApiRouter::with_openapi(ApiDoc::openapi())
         .route("/", get(health_check))
