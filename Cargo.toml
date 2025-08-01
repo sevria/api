@@ -17,6 +17,7 @@ fake = { version = "4.3.0", features = ["derive"] }
 jsonwebtoken = "9.3.1"
 log = "0.4.27"
 nanoid = "0.4.0"
+regex = "1.11.1"
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.141"
 sqlx = { version = "0.8.6", features = ["runtime-tokio", "tls-rustls", "postgres", "chrono"] }

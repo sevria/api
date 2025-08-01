@@ -5,7 +5,7 @@ use crate::{
         model::{CreateSchemaRequest, Schema},
         repository::SchemaRepository,
     },
-    util::{error::Error, paginator::Paginated},
+    util::{error::Error, paginator::Paginated, validator::validate},
 };
 
 pub struct SchemaService {
@@ -20,6 +20,7 @@ impl SchemaService {
 
 impl SchemaService {
     pub async fn create(&self, req: &CreateSchemaRequest) -> Result<Schema, Error> {
+        validate(req)?;
         let data = Schema::new(req.name.clone());
         self.schema_repository.create(&data).await
     }

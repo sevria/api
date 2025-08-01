@@ -41,13 +41,28 @@ impl SchemaRepository for SchemaRepositoryImpl {
         query.push_bind(&data.name);
         query.push(") RETURNING *");
 
-        match query.build_query_as::<Schema>().fetch_one(&*self.db).await {
-            Ok(schema) => Ok(schema),
+        let schema = match query.build_query_as::<Schema>().fetch_one(&*self.db).await {
+            Ok(schema) => schema,
             Err(err) => {
-                log::error!("failed to create schema: {}", err);
-                Err(Error::Internal)
+                log::error!("Failed to create schema: {}", err);
+                return Err(Error::Internal);
+            }
+        };
+
+        // Create table
+        let mut query = QueryBuilder::new("CREATE TABLE ");
+        query.push(&data.name);
+        query.push(" (id CHAR(21) PRIMARY KEY)");
+
+        match query.build().execute(&*self.db).await {
+            Ok(_) => {}
+            Err(err) => {
+                log::error!("Failed to create table: {}", err);
+                return Err(Error::Internal);
             }
         }
+
+        Ok(schema)
     }
 
     async fn list(&self) -> Result<Paginated<Schema>, Error> {
@@ -56,7 +71,7 @@ impl SchemaRepository for SchemaRepositoryImpl {
         let schemas = match query.fetch_all(&*self.db).await {
             Ok(schemas) => schemas,
             Err(err) => {
-                log::error!("failed to get schemas: {}", err);
+                log::error!("Failed to get schemas: {}", err);
                 return Err(Error::Internal);
             }
         };
@@ -75,7 +90,7 @@ impl SchemaRepository for SchemaRepositoryImpl {
         match query.fetch_one(&*self.db).await {
             Ok(schema) => Ok(schema),
             Err(err) => {
-                log::error!("failed to get schema: {}", err);
+                log::error!("Failed to get schema: {}", err);
                 return Err(Error::Internal);
             }
         }
@@ -88,7 +103,7 @@ impl SchemaRepository for SchemaRepositoryImpl {
             Ok(schema) => Ok(schema),
             Err(sqlx::Error::RowNotFound) => Err(Error::NotFound),
             Err(err) => {
-                log::error!("failed to get schema by name: {}", err);
+                log::error!("Failed to get schema by name: {}", err);
                 return Err(Error::Internal);
             }
         }
@@ -111,7 +126,7 @@ impl SchemaRepository for SchemaRepositoryImpl {
         match query.build_query_as::<Schema>().fetch_one(&*self.db).await {
             Ok(schema) => Ok(schema),
             Err(err) => {
-                log::error!("failed to update schema: {}", err);
+                log::error!("Failed to update schema: {}", err);
                 return Err(Error::Internal);
             }
         }
@@ -125,7 +140,7 @@ impl SchemaRepository for SchemaRepositoryImpl {
         match query.build_query_as::<Schema>().fetch_one(&*self.db).await {
             Ok(schema) => Ok(schema),
             Err(err) => {
-                log::error!("failed to delete schema: {}", err);
+                log::error!("Failed to delete schema: {}", err);
                 return Err(Error::Internal);
             }
         }
