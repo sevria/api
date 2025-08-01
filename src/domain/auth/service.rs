@@ -80,11 +80,7 @@ impl AuthService {
     pub async fn refresh(&self, req: &RefreshTokenRequest) -> Result<LoginResponse, Error> {
         validate(req)?;
 
-        let mut session = match self
-            .session_repository
-            .get(&req.token.clone().unwrap(), &req.user_id.clone().unwrap())
-            .await
-        {
+        let mut session = match self.session_repository.get(&req.token, &req.user_id).await {
             Ok(session) => session,
             Err(Error::NotFound) => return Err(Error::Unauthenticated),
             Err(err) => return Err(err),

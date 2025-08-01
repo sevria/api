@@ -8,4 +8,4 @@ test:
 	for file in tests/seedings/*.sql; do \
 		psql "$$DATABASE_URL" -f "$$file"; \
 	done
-	cargo test -- --show-output
+	cargo test

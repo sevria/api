@@ -17,3 +17,9 @@ pub async fn setup() -> Result<TestServer> {
 
     Ok(server)
 }
+
+#[allow(dead_code)]
+pub struct TestCase {
+    pub data: serde_json::Value,
+    pub expected_error: String,
+}

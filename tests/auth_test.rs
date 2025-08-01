@@ -2,6 +2,8 @@ use anyhow::Result;
 use serde_json::json;
 use sevria_api::domain::auth::model::LoginResponse;
 
+use crate::common::TestCase;
+
 mod common;
 
 #[tokio::test]
@@ -50,6 +52,46 @@ async fn refresh_success() -> Result<()> {
             "email": "admin@example.com",
         }
     }));
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn refresh_validation() -> Result<()> {
+    let server = common::setup().await?;
+
+    let test_cases = vec![
+        TestCase {
+            data: json!({"token": "", "user_id": "7XSAgkxMcDSrb2LYHtzEi"}),
+            expected_error: String::from("Token must be 36 characters"),
+        },
+        TestCase {
+            data: json!({"token": "very-short", "user_id": "7XSAgkxMcDSrb2LYHtzEi"}),
+            expected_error: String::from("Token must be 36 characters"),
+        },
+        TestCase {
+            data: json!({"token": "this-takes-more-than-36-characters-long", "user_id": "7XSAgkxMcDSrb2LYHtzEi"}),
+            expected_error: String::from("Token must be 36 characters"),
+        },
+        TestCase {
+            data: json!({"token": "qtlf3L9_FQtwuJaTZgs4L2rlUFRnKSZuAyS3", "user_id": ""}),
+            expected_error: String::from("User ID must be 21 characters"),
+        },
+        TestCase {
+            data: json!({"token": "qtlf3L9_FQtwuJaTZgs4L2rlUFRnKSZuAyS3", "user_id": "very-short"}),
+            expected_error: String::from("User ID must be 21 characters"),
+        },
+        TestCase {
+            data: json!({"token": "qtlf3L9_FQtwuJaTZgs4L2rlUFRnKSZuAyS3", "user_id": "more-than-21-characters-long"}),
+            expected_error: String::from("User ID must be 21 characters"),
+        },
+    ];
+
+    for test_case in test_cases {
+        let res = server.post("/auth/refresh").json(&test_case.data).await;
+        res.assert_status_bad_request();
+        res.assert_json_contains(&json!({"message": test_case.expected_error}));
+    }
 
     Ok(())
 }

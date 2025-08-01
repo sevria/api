@@ -1,15 +1,15 @@
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[error("already present")]
+    #[error("Already present")]
     AlreadyPresent,
-    #[error("internal error")]
+    #[error("Internal error")]
     Internal,
     #[error("{0}")]
     InvalidArgument(String),
-    #[error("not found")]
+    #[error("Not found")]
     NotFound,
-    #[error("permission denied")]
+    #[error("Permission denied")]
     PermissionDenied,
-    #[error("unauthenticated")]
+    #[error("Unauthenticated")]
     Unauthenticated,
 }
