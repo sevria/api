@@ -39,16 +39,16 @@ impl AuthService {
 
 impl AuthService {
     pub async fn login(&self, req: &LoginRequest) -> Result<LoginResponse, Error> {
+        validate(req)?;
+
         let user = match self
             .user_repository
             .get(&GetUserRequest::Email(req.email.clone()))
             .await
         {
             Ok(user) => user,
-            Err(err) => {
-                log::error!("failed to get user by email: {}", err);
-                return Err(Error::Internal);
-            }
+            Err(Error::NotFound) => return Err(Error::Unauthenticated),
+            Err(err) => return Err(err),
         };
 
         let is_password_verified = verify_password(&user.password, &req.password)?;

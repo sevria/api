@@ -12,9 +12,22 @@ pub struct Token {
     pub expires_at: DateTime<Utc>,
 }
 
-#[derive(Deserialize, ToSchema)]
+#[derive(Deserialize, ToSchema, Validate)]
 pub struct LoginRequest {
+    #[validate(
+        length(
+            min = 3,
+            max = 50,
+            message = "Email must be between 3 and 50 characters"
+        ),
+        email(message = "Invalid email")
+    )]
     pub email: String,
+    #[validate(length(
+        min = 8,
+        max = 50,
+        message = "Password must be between 8 and 50 characters"
+    ))]
     pub password: String,
 }
 

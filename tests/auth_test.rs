@@ -27,6 +27,42 @@ async fn login_success() -> Result<()> {
 }
 
 #[tokio::test]
+async fn login_validation() -> Result<()> {
+    let server = common::setup().await?;
+
+    let test_cases = vec![
+        TestCase {
+            data: json!({"email": "", "password": "Sevria123"}),
+            expected_error: String::from("Email must be between 3 and 50 characters"),
+        },
+        TestCase {
+            data: json!({"email": "not-a-valid-email", "password": "Sevria123"}),
+            expected_error: String::from("Invalid email"),
+        },
+        TestCase {
+            data: json!({"email": "very-very-long-email-more-than-50-characters@mailbox.com", "password": "Sevria123"}),
+            expected_error: String::from("Email must be between 3 and 50 characters"),
+        },
+        TestCase {
+            data: json!({"email": "user@example.com", "password": ""}),
+            expected_error: String::from("Password must be between 8 and 50 characters"),
+        },
+        TestCase {
+            data: json!({"email": "user@example.com", "password": "this-is-a-very-long-password-more-than-50-characters"}),
+            expected_error: String::from("Password must be between 8 and 50 characters"),
+        },
+    ];
+
+    for test_case in test_cases {
+        let res = server.post("/auth/login").json(&test_case.data).await;
+        res.assert_status_bad_request();
+        res.assert_json_contains(&json!({"message": test_case.expected_error}));
+    }
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn refresh_success() -> Result<()> {
     let server = common::setup().await?;
     let login_req = json!({
