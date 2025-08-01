@@ -4,7 +4,10 @@ use async_trait::async_trait;
 use sqlx::{Pool, Postgres, QueryBuilder};
 
 use crate::{
-    domain::session::{model::Session, repository::SessionRepository},
+    domain::session::{
+        model::{Session, UpdateSessionRequest},
+        repository::SessionRepository,
+    },
     util::error::Error,
 };
 
@@ -46,14 +49,36 @@ impl SessionRepository for SessionRepositoryImpl {
         let mut query = QueryBuilder::new("SELECT * FROM sessions WHERE ");
 
         query.push("token = ");
-        query.push_bind(&token);
+        query.push_bind(token);
         query.push(" AND user_id = ");
-        query.push_bind(&user_id);
+        query.push_bind(user_id);
+
+        match query.build_query_as::<Session>().fetch_one(&*self.db).await {
+            Ok(session) => Ok(session),
+            Err(sqlx::Error::RowNotFound) => Err(Error::NotFound),
+            Err(err) => {
+                log::error!("failed to get session: {}", err);
+                Err(Error::Internal)
+            }
+        }
+    }
+
+    async fn update(&self, id: &str, data: &UpdateSessionRequest) -> Result<Session, Error> {
+        let mut query = QueryBuilder::new("UPDATE sessions SET updated_at = NOW()");
+
+        if let Some(token) = &data.token {
+            query.push(", token = ");
+            query.push_bind(token);
+        }
+
+        query.push(" WHERE id = ");
+        query.push_bind(id);
+        query.push(" RETURNING *");
 
         match query.build_query_as::<Session>().fetch_one(&*self.db).await {
             Ok(session) => Ok(session),
             Err(err) => {
-                log::error!("failed to get session: {}", err);
+                log::error!("failed to update session: {}", err);
                 Err(Error::Internal)
             }
         }

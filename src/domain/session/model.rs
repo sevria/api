@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
 use utoipa::ToSchema;
 
-#[derive(FromRow, Serialize, ToSchema)]
+#[derive(Clone, FromRow, Serialize, ToSchema)]
 pub struct Session {
     pub id: String,
     pub token: String,
@@ -18,15 +18,19 @@ pub struct Session {
 }
 
 impl Session {
-    pub fn new(user_id: &str, expires_at: DateTime<Utc>) -> Session {
+    pub fn new(user_id: String, expires_at: DateTime<Utc>) -> Session {
         Session {
             id: nanoid!(),
             token: nanoid!(36),
-            user_id: user_id.to_string(),
+            user_id,
             created_at: Utc::now(),
             updated_at: Utc::now(),
             expires_at,
         }
+    }
+
+    pub fn generate_token() -> String {
+        nanoid!(36)
     }
 }
 
@@ -34,4 +38,9 @@ impl Session {
 pub struct CreateSessionRequest {
     pub user_id: String,
     pub expires_at: DateTime<Utc>,
+}
+
+#[derive(Deserialize, ToSchema)]
+pub struct UpdateSessionRequest {
+    pub token: Option<String>,
 }

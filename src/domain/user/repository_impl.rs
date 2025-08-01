@@ -5,7 +5,10 @@ use sqlx::{Pool, Postgres, QueryBuilder};
 
 use crate::util::error::Error;
 
-use super::{model::User, repository::UserRepository};
+use super::{
+    model::{GetUserRequest, User},
+    repository::UserRepository,
+};
 
 pub struct UserRepositoryImpl {
     db: Arc<Pool<Postgres>>,
@@ -38,13 +41,25 @@ impl UserRepository for UserRepositoryImpl {
         }
     }
 
-    async fn get_by_email(&self, email: &str) -> Result<User, Error> {
-        let query = sqlx::query_as::<_, User>("SELECT * FROM users WHERE email = $1").bind(email);
+    async fn get(&self, req: &GetUserRequest) -> Result<User, Error> {
+        let mut query = QueryBuilder::new("SELECT * FROM users WHERE");
 
-        match query.fetch_one(&*self.db).await {
+        match req {
+            GetUserRequest::Id(id) => {
+                query.push(" id = ");
+                query.push_bind(id);
+            }
+            GetUserRequest::Email(email) => {
+                query.push(" email = ");
+                query.push_bind(email);
+            }
+        }
+
+        match query.build_query_as::<User>().fetch_one(&*self.db).await {
             Ok(user) => Ok(user),
+            Err(sqlx::Error::RowNotFound) => Err(Error::NotFound),
             Err(err) => {
-                log::error!("failed to get user by email: {}", err);
+                log::error!("failed to get user: {}", err);
                 return Err(Error::Internal);
             }
         }

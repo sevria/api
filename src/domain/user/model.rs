@@ -2,12 +2,12 @@ use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
 use utoipa::ToSchema;
 
-#[derive(Clone, FromRow, Serialize, ToSchema)]
+#[derive(Clone, Deserialize, FromRow, Serialize, ToSchema)]
 pub struct User {
     pub id: String,
     pub name: String,
     pub email: String,
-    #[serde(skip_serializing)]
+    #[serde(skip)]
     pub password: String,
 }
 
@@ -16,4 +16,9 @@ pub struct CreateUserRequest {
     pub name: String,
     pub email: String,
     pub password: String,
+}
+
+pub enum GetUserRequest {
+    Id(String),
+    Email(String),
 }

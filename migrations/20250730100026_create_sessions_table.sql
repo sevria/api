@@ -1,6 +1,6 @@
 CREATE TABLE sessions (
     id CHAR(21) PRIMARY KEY,
-    token VARCHAR(100) NOT NULL,
+    token VARCHAR(50) NOT NULL,
     user_id CHAR(21) NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

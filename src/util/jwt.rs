@@ -24,10 +24,10 @@ impl Claims {
 pub fn generate_token(
     secret: &str,
     user_id: &str,
-    expires_at: DateTime<Utc>,
+    expires_at: &DateTime<Utc>,
 ) -> Result<String, Error> {
     let header = Header::default();
-    let claims = Claims::new(user_id.to_string(), expires_at);
+    let claims = Claims::new(user_id.to_string(), expires_at.to_owned());
     let key = EncodingKey::from_secret(secret.as_ref());
 
     let token = match encode(&header, &claims, &key) {

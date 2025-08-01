@@ -27,10 +27,10 @@ impl FieldService {
             req.required,
             req.default_value.clone(),
         );
-        self.field_repository.create(&data).await
+        self.field_repository.create(data).await
     }
 
     pub async fn list(&self, schema_id: String) -> Result<Vec<Field>, Error> {
-        self.field_repository.list(&schema_id).await
+        self.field_repository.list(schema_id).await
     }
 }

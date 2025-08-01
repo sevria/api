@@ -7,8 +7,8 @@ use crate::{
 
 #[async_trait]
 pub trait FieldRepository: Send + Sync {
-    async fn create(&self, data: &Field) -> Result<Field, Error>;
-    async fn list(&self, schema_id: &str) -> Result<Vec<Field>, Error>;
-    async fn update(&self, data: &UpdateFieldRequest) -> Result<Field, Error>;
-    async fn delete(&self, schema_id: &str, name: &str) -> Result<Field, Error>;
+    async fn create(&self, data: Field) -> Result<Field, Error>;
+    async fn list(&self, schema_id: String) -> Result<Vec<Field>, Error>;
+    async fn update(&self, data: UpdateFieldRequest) -> Result<Field, Error>;
+    async fn delete(&self, schema_id: String, name: String) -> Result<Field, Error>;
 }

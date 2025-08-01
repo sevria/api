@@ -60,6 +60,8 @@ async fn refresh(
     State(state): State<Arc<AuthState>>,
     Json(req): Json<RefreshTokenRequest>,
 ) -> Result<Json<LoginResponse>, Error> {
-    let res = state.auth_service.refresh(&req).await?;
-    Ok(Json(res))
+    match state.auth_service.refresh(&req).await {
+        Ok(res) => Ok(Json(res)),
+        Err(err) => Err(err),
+    }
 }

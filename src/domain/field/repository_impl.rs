@@ -23,7 +23,7 @@ impl FieldRepositoryImpl {
 
 #[async_trait]
 impl FieldRepository for FieldRepositoryImpl {
-    async fn create(&self, data: &Field) -> Result<Field, Error> {
+    async fn create(&self, data: Field) -> Result<Field, Error> {
         let mut query = QueryBuilder::new(
             "INSERT INTO fields (schema_id, name, value_type, required, default_value) VALUES (",
         );
@@ -48,7 +48,7 @@ impl FieldRepository for FieldRepositoryImpl {
         }
     }
 
-    async fn list(&self, schema_id: &str) -> Result<Vec<Field>, Error> {
+    async fn list(&self, schema_id: String) -> Result<Vec<Field>, Error> {
         let mut query = QueryBuilder::new("SELECT * FROM fields");
 
         query.push(" WHERE schema_id = ");
@@ -64,7 +64,7 @@ impl FieldRepository for FieldRepositoryImpl {
         }
     }
 
-    async fn update(&self, data: &UpdateFieldRequest) -> Result<Field, Error> {
+    async fn update(&self, data: UpdateFieldRequest) -> Result<Field, Error> {
         let mut query = QueryBuilder::new("UPDATE fields SET");
         query.push(" name = ");
         query.push_bind(&data.name);
@@ -89,7 +89,7 @@ impl FieldRepository for FieldRepositoryImpl {
         }
     }
 
-    async fn delete(&self, schema_id: &str, name: &str) -> Result<Field, Error> {
+    async fn delete(&self, schema_id: String, name: String) -> Result<Field, Error> {
         let mut query = QueryBuilder::new("DELETE FROM fields WHERE schema_id = ");
         query.push_bind(&schema_id);
         query.push(" AND name = ");
