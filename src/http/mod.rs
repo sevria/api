@@ -11,6 +11,7 @@ use crate::{
     context::Context,
     domain::{
         auth::{self, http::AuthState},
+        data::{self, http::DataState},
         field::{self, http::FieldState},
         schema::{self, http::SchemaState},
     },
@@ -26,9 +27,10 @@ use crate::{
 struct ApiDoc;
 
 pub fn new_router(context: Context) -> Router {
-    let schema_state = Arc::new(SchemaState::new(context.schema_service));
-    let field_state = Arc::new(FieldState::new(context.field_service));
     let auth_state = Arc::new(AuthState::new(context.auth_service));
+    let data_state = Arc::new(DataState::new(context.data_service));
+    let field_state = Arc::new(FieldState::new(context.field_service));
+    let schema_state = Arc::new(SchemaState::new(context.schema_service));
 
     let (router, api) = OpenApiRouter::with_openapi(ApiDoc::openapi())
         .route("/", get(health_check))
@@ -37,6 +39,10 @@ pub fn new_router(context: Context) -> Router {
         .nest(
             "/schemas/{schema_id}/fields",
             field::http::router(field_state),
+        )
+        .nest(
+            "/schemas/{schema_name}/data",
+            data::http::router(data_state),
         )
         .split_for_parts();
 

@@ -1,0 +1,3 @@
+CREATE TABLE posts (
+    id CHAR(21) PRIMARY KEY
+);

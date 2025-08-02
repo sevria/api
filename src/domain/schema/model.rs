@@ -1,8 +1,5 @@
-use std::sync::LazyLock;
-
 use fake::Dummy;
 use nanoid::nanoid;
-use regex::Regex;
 use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
 use utoipa::ToSchema;
@@ -28,19 +25,9 @@ impl Schema {
     }
 }
 
-static NAME_SANITIZER: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^[a-z][a-z0-9_]*$").unwrap());
-
 #[derive(Debug, Deserialize, Dummy, Serialize, ToSchema, Validate)]
 pub struct CreateSchemaRequest {
-    #[validate(
-        length(
-            min = 1,
-            max = 50,
-            message = "Name must be between 1 and 50 characters"
-        ), 
-        regex(path = *NAME_SANITIZER, message = "Name must be lowercase and contain only letters, numbers, and underscores")
-    )]
+    #[validate(custom(function = "super::validate::name"))]
     pub name: String,
 }
 
