@@ -62,6 +62,19 @@ Build and run:
 cargo run
 ```
 
+### Environment variables
+
+| Variable                 | Description                    | Default value       |
+| ------------------------ | ------------------------------ | ------------------- |
+| `DATABASE_URL`           | PostgreSQL connection string   | N/A                 |
+| `DEFAULT_ADMIN_EMAIL`    | Default admin user email       | `admin@example.com` |
+| `DEFAULT_ADMIN_PASSWORD` | Default admin password         | `Sevria123`         |
+| `HTTP_ADDRESS`           | Server bind address            | `0.0.0.0:4000`      |
+| `JWT_EXPIRES_IN_MINUTES` | JWT expiration time in minutes | `15`                |
+| `JWT_SECRET`             | Secret key used to sign JWTs   | N/A                 |
+
+### API docs
+
 The OpenAPI documentation is available at http://localhost:4000/docs when the application is running.
 
 ### Running tests
