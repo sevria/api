@@ -62,7 +62,7 @@ Build and run:
 cargo run
 ```
 
-The OpenAPI documentation is available at `http://localhost:4000/docs` when the application is running.
+The OpenAPI documentation is available at http://localhost:4000/docs when the application is running.
 
 ### Running tests
 
