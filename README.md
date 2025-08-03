@@ -2,7 +2,7 @@
 
 REST API server for Sevria, an open-source headless CMS.
 
-# Project structure
+## Project structure
 
 ```
 api/
