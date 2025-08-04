@@ -38,17 +38,16 @@ struct ApiDoc;
 pub fn new_router(config: Arc<Config>, context: Context) -> Router {
     let mut cors = CorsLayer::new()
         .allow_headers([AUTHORIZATION, CONTENT_TYPE])
-        .allow_methods([Method::GET, Method::POST]);
+        .allow_methods([Method::GET, Method::POST, Method::PATCH, Method::DELETE]);
 
     if config.cors_allow_origin == "*" {
         cors = cors.allow_origin(Any);
     } else {
-        let origins = config
+        let origins: Vec<HeaderValue> = config
             .cors_allow_origin
             .split(",")
-            .map(HeaderValue::from_str)
-            .collect::<Result<Vec<HeaderValue>, _>>()
-            .unwrap();
+            .filter_map(|origin| HeaderValue::from_str(origin.trim()).ok())
+            .collect();
         cors = cors.allow_origin(origins);
     }
 
