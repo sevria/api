@@ -66,6 +66,7 @@ cargo run
 
 | Variable                 | Description                    | Default value       |
 | ------------------------ | ------------------------------ | ------------------- |
+| `CORS_ALLOW_ORIGIN`      | Allowed CORS origins           | `*`                 |
 | `DATABASE_URL`           | PostgreSQL connection string   | N/A                 |
 | `DEFAULT_ADMIN_EMAIL`    | Default admin user email       | `admin@example.com` |
 | `DEFAULT_ADMIN_PASSWORD` | Default admin password         | `Sevria123`         |

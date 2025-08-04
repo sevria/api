@@ -23,6 +23,7 @@ serde_json = "1.0.141"
 sqlx = { version = "0.8.6", features = ["runtime-tokio", "tls-rustls", "postgres", "chrono"] }
 thiserror = "2.0.12"
 tokio = { version = "1.46.1", features = ["macros", "rt-multi-thread"] }
+tower-http = { version = "0.6.6", features = ["cors"] }
 utoipa = { version = "5.4.0", features = ["chrono"] }
 utoipa-axum = "0.2.0"
 utoipa-scalar = { version = "0.3.0", features = ["axum"] }

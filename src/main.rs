@@ -41,7 +41,7 @@ async fn main() -> Result<()> {
         };
     }
 
-    let router = http::new_router(context);
+    let router = http::new_router(config.clone(), context);
     let listener = tokio::net::TcpListener::bind(&config.http_address).await?;
 
     log::info!("Running HTTP server on {}", listener.local_addr()?);

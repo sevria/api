@@ -1,12 +1,21 @@
 use std::sync::Arc;
 
-use axum::{Router, routing::get};
+use axum::{
+    Router,
+    http::{
+        HeaderValue, Method,
+        header::{AUTHORIZATION, CONTENT_TYPE},
+    },
+    routing::get,
+};
 use serde::Serialize;
+use tower_http::cors::{Any, CorsLayer};
 use utoipa::OpenApi;
 use utoipa_axum::router::OpenApiRouter;
 use utoipa_scalar::{Scalar, Servable};
 
 use crate::{
+    config::Config,
     constant,
     context::Context,
     domain::{
@@ -26,7 +35,23 @@ use crate::{
 )]
 struct ApiDoc;
 
-pub fn new_router(context: Context) -> Router {
+pub fn new_router(config: Arc<Config>, context: Context) -> Router {
+    let mut cors = CorsLayer::new()
+        .allow_headers([AUTHORIZATION, CONTENT_TYPE])
+        .allow_methods([Method::GET, Method::POST]);
+
+    if config.cors_allow_origin == "*" {
+        cors = cors.allow_origin(Any);
+    } else {
+        let origins = config
+            .cors_allow_origin
+            .split(",")
+            .map(HeaderValue::from_str)
+            .collect::<Result<Vec<HeaderValue>, _>>()
+            .unwrap();
+        cors = cors.allow_origin(origins);
+    }
+
     let auth_state = Arc::new(AuthState::new(context.auth_service));
     let data_state = Arc::new(DataState::new(context.data_service));
     let field_state = Arc::new(FieldState::new(context.field_service));
@@ -44,6 +69,7 @@ pub fn new_router(context: Context) -> Router {
             "/schemas/{schema_name}/data",
             data::http::router(data_state),
         )
+        .layer(cors)
         .split_for_parts();
 
     let router = router.merge(Scalar::with_url("/docs", api));

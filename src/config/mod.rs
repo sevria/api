@@ -2,6 +2,9 @@ use envconfig::Envconfig;
 
 #[derive(Envconfig)]
 pub struct Config {
+    #[envconfig(from = "CORS_ALLOW_ORIGIN", default = "*")]
+    pub cors_allow_origin: String,
+
     #[envconfig(from = "DATABASE_URL")]
     pub database_url: String,
 

@@ -14,9 +14,9 @@ pub async fn setup() -> Result<TestServer> {
     let db = Arc::new(PgPoolOptions::new().connect(&config.database_url).await?);
 
     // Create context containing repositories and services
-    let context = Context::new(config, db);
+    let context = Context::new(config.clone(), db);
 
-    let router = http::new_router(context);
+    let router = http::new_router(config, context);
     let server = TestServer::new(router)?;
 
     Ok(server)
