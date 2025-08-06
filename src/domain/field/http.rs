@@ -32,6 +32,7 @@ pub fn router(state: Arc<FieldState>) -> OpenApiRouter {
 #[utoipa::path(
     post,
     path = "",
+    operation_id = "create_field",
     summary = "Create field",
     tag = constant::TAG_FIELD,
     params(
@@ -55,6 +56,7 @@ async fn create(
 #[utoipa::path(
     get,
     path = "",
+    operation_id = "list_fields",
     summary = "List fields",
     tag = constant::TAG_FIELD,
     params(

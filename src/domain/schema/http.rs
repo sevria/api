@@ -33,6 +33,7 @@ pub fn router(state: Arc<SchemaState>) -> OpenApiRouter {
 #[utoipa::path(
     post,
     path = "",
+    operation_id = "create_schema",
     summary = "Create schema",
     tag = constant::TAG_SCHEMA,
     request_body = CreateSchemaRequest,
@@ -51,6 +52,7 @@ async fn create(
 #[utoipa::path(
     get,
     path = "",
+    operation_id = "list_schemas",
     summary = "List schemas",
     tag = constant::TAG_SCHEMA,
     responses(
@@ -64,6 +66,7 @@ async fn list(State(state): State<Arc<SchemaState>>) -> Result<Json<Paginated<Sc
 #[utoipa::path(
     get,
     path = "/{id}",
+    operation_id = "get_schema",
     summary = "Get schema",
     tag = constant::TAG_SCHEMA,
     params(
@@ -83,6 +86,7 @@ async fn get(
 #[utoipa::path(
     patch,
     path = "/{id}",
+    operation_id = "update_schema",
     summary = "Update schema",
     tag = constant::TAG_SCHEMA,
     params(
@@ -104,6 +108,7 @@ async fn update(Path(id): Path<String>, Json(req): Json<UpdateSchemaRequest>) ->
 #[utoipa::path(
     delete,
     path = "/{id}",
+    operation_id = "delete_schema",
     summary = "Delete schema",
     tag = constant::TAG_SCHEMA,
     params(

@@ -31,6 +31,7 @@ pub fn router(state: Arc<AuthState>) -> OpenApiRouter {
 #[utoipa::path(
     post,
     path = "/login",
+    operation_id = "login",
     summary = "Login",
     tag = constant::TAG_AUTH,
     request_body = LoginRequest,
@@ -49,6 +50,7 @@ async fn login(
 #[utoipa::path(
     post,
     path = "/refresh",
+    operation_id = "refresh_token",
     summary = "Refresh token",
     tag = constant::TAG_AUTH,
     request_body = RefreshTokenRequest,

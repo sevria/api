@@ -31,6 +31,7 @@ pub fn router(state: Arc<DataState>) -> OpenApiRouter {
 #[utoipa::path(
     post,
     path = "",
+    operation_id = "create_data",
     summary = "Create data",
     tag = constant::TAG_DATA,
     params(
