@@ -12,7 +12,7 @@ use serde::Serialize;
 use tower_http::cors::{Any, CorsLayer};
 use utoipa::OpenApi;
 use utoipa_axum::router::OpenApiRouter;
-use utoipa_scalar::{Scalar, Servable};
+use utoipa_swagger_ui::SwaggerUi;
 
 use crate::{
     config::Config,
@@ -71,7 +71,7 @@ pub fn new_router(config: Arc<Config>, context: Context) -> Router {
         .layer(cors)
         .split_for_parts();
 
-    let router = router.merge(Scalar::with_url("/docs", api));
+    let router = router.merge(SwaggerUi::new("/docs").url("/openapi.json", api));
 
     router
 }
