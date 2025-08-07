@@ -10,6 +10,6 @@ pub enum Error {
     NotFound,
     #[error("Permission denied")]
     PermissionDenied,
-    #[error("Unauthenticated")]
-    Unauthenticated,
+    #[error("{0}")]
+    Unauthenticated(String),
 }

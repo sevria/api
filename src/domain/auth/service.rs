@@ -47,13 +47,19 @@ impl AuthService {
             .await
         {
             Ok(user) => user,
-            Err(Error::NotFound) => return Err(Error::Unauthenticated),
+            Err(Error::NotFound) => {
+                return Err(Error::Unauthenticated(String::from(
+                    "Invalid email or password",
+                )));
+            }
             Err(err) => return Err(err),
         };
 
         let is_password_verified = verify_password(&user.password, &req.password)?;
         if !is_password_verified {
-            return Err(Error::Unauthenticated);
+            return Err(Error::Unauthenticated(String::from(
+                "Invalid email or password",
+            )));
         }
 
         let access_token_expires_at =
@@ -82,7 +88,11 @@ impl AuthService {
 
         let mut session = match self.session_repository.get(&req.token, &req.user_id).await {
             Ok(session) => session,
-            Err(Error::NotFound) => return Err(Error::Unauthenticated),
+            Err(Error::NotFound) => {
+                return Err(Error::Unauthenticated(String::from(
+                    "Invalid token or user ID",
+                )));
+            }
             Err(err) => return Err(err),
         };
 

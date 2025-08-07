@@ -32,7 +32,7 @@ impl IntoResponse for Error {
             Error::InvalidArgument(_) => StatusCode::BAD_REQUEST,
             Error::NotFound => StatusCode::NOT_FOUND,
             Error::PermissionDenied => StatusCode::FORBIDDEN,
-            Error::Unauthenticated => StatusCode::UNAUTHORIZED,
+            Error::Unauthenticated(_) => StatusCode::UNAUTHORIZED,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         };
 

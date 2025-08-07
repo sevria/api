@@ -5,7 +5,10 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     constant,
-    domain::auth::model::{LoginRequest, LoginResponse, RefreshTokenRequest},
+    domain::{
+        auth::model::{LoginRequest, LoginResponse, RefreshTokenRequest},
+        common::model::ErrorResponse,
+    },
     util::{error::Error, http::Json},
 };
 
@@ -36,7 +39,9 @@ pub fn router(state: Arc<AuthState>) -> OpenApiRouter {
     tag = constant::TAG_AUTH,
     request_body = LoginRequest,
     responses(
-        (status = 200, body = LoginResponse)
+        (status = 200, description = "Success", body = LoginResponse),
+        (status = 401, description = "Invalid email or password", body = ErrorResponse),
+        (status = 500, description = "Internal error", body = ErrorResponse)
     )
 )]
 async fn login(
@@ -55,7 +60,9 @@ async fn login(
     tag = constant::TAG_AUTH,
     request_body = RefreshTokenRequest,
     responses(
-        (status = 200, body = LoginResponse)
+        (status = 200, description = "Success", body = LoginResponse),
+        (status = 401, description = "Invalid token or user ID", body = ErrorResponse),
+        (status = 500, description = "Internal error", body = ErrorResponse)
     )
 )]
 async fn refresh(
